@@ -5,7 +5,7 @@
 
       <v-card class="card space gap2">
         <div class="divcol" style="gap: 10px">
-          <label>Total Value Locked 
+          <label>Total Value Locked
             <img src="~/assets/sources/icons/info.svg" alt="info icon" style="--w: .813125em">
           </label>
           <span>{{poolsLocked ? `$${poolsLocked.toLocaleString().split('.').join(',')}` : ''}}</span>
@@ -25,7 +25,7 @@
           {{item}}
         </v-tab>
       </v-tabs>
-      
+
       <div class="space" style="gap: 15px">
         <v-text-field
           v-model="filters.search"
@@ -40,7 +40,7 @@
             <img src="~/assets/sources/icons/search.svg" alt="search icon" class="mr-1">
           </template>
         </v-text-field>
-        
+
         <v-btn
           class="btn" style="--fs: max(11px, 1em);--b: 1px solid #2D291D; --br: 10px; --g: .25em"
           @click="$router.push(localePath('/pools-create'))"
@@ -50,42 +50,42 @@
         </v-btn>
       </div>
     </section>
-    
+
     <!-- need empty image here -->
     <v-data-table
+      :loading="$liquidity.liquidityLoading"
       :headers="tableHeaders"
       :items="filterDataPools"
       hide-default-footer
       mobile-breakpoint="-1"
-      @click:row="goTo($event)"
     >
       <template #[`item.poolName`]="{ item }">
         <div class="acenter font2" style="gap: 10px">
-          <v-sheet class="dual-tokens" color="transparent" style="--h-sheet: 40px">
+          <!-- <v-sheet class="dual-tokens" color="transparent" style="--h-sheet: 40px">
             <img :src="require(`~/assets/sources/tokens/${item.tokenA}.svg`)" :alt="`${item.tokenA} token`" class="aspect">
             <img :src="require(`~/assets/sources/tokens/${item.tokenB}.svg`)" :alt="`${item.tokenB} token`" class="aspect">
-          </v-sheet>
-          
+          </v-sheet> -->
+
           <span class="bold tup">{{item.poolName}}</span>
         </div>
       </template>
-      
+
       <template #[`item.liquidity`]="{ item }">
-        {{item.liquidity ? `$${item.liquidity.toLocaleString().split(".").join(",")}` : ""}}
+        {{item.liquidity}}
       </template>
-      
+
       <template #[`item.volume`]="{ item }">
         {{item.volume ? `$${item.volume.toLocaleString().split(".").join(",")}` : ""}}
       </template>
-      
+
       <template #[`item.fees`]="{ item }">
         {{item.fees ? `$${item.fees.toLocaleString().split(".").join(",")}` : ""}}
       </template>
-      
+
       <template #[`item.apr`]="{ item }">
         {{item.apr ? `${item.apr}%` : ""}}
       </template>
-      
+
       <template #no-data>
         <div class="divcol center tcenter align font1 nopevents">
           <template v-if="filters.pools === 'my pools'">
@@ -98,7 +98,7 @@
               Create Pool
             </v-btn>
           </template>
-          
+
           <template v-else>
             <img src="~/assets/sources/icons/empty.png" alt="empty icon" style="--w: 13.4375em">
             <span class="h9_em bold mt-5 mb-2">No results found</span>
@@ -119,48 +119,48 @@ export default {
   data() {
     return {
       poolsLocked: 200009,
-      dataFilterPools: ["all pools", "my pools"],
+      dataFilterPools: ["my pools"],
       filters: {
-        pools: "all farms",
+        pools:  "my pools",
         search: undefined,
       },
 
       tableHeaders: [
         { value: "poolName", text: "Name", sortable: false },
         { value: "liquidity", text: "Liquidity", align: "start", sortable: false },
-        { value: "volume", text: "Volume (24th)", align: "start", sortable: false },
-        { value: "fees", text: "Fees (24th)", align: "start", sortable: false },
-        { value: "apr", text: "APR", align: "start", sortable: false },
+        // { value: "volume", text: "Volume (24th)", align: "start", sortable: false },
+        // { value: "fees", text: "Fees (24th)", align: "start", sortable: false },
+        // { value: "apr", text: "APR", align: "start", sortable: false },
       ],
-      dataPools: [
-        {
-          poolName: "btc-usdc",
-          tokenA: "btc",
-          tokenB: "usdc",
-          liquidity: 100000000,
-          volume: 100000000,
-          fees: 100000000,
-          apr: 2335,
-        },
-        {
-          poolName: "btc-usdc",
-          tokenA: "btc",
-          tokenB: "usdc",
-          liquidity: 100000000,
-          volume: 100000000,
-          fees: 100000000,
-          apr: 2335,
-        },
-        {
-          poolName: "btc-usdc",
-          tokenA: "btc",
-          tokenB: "usdc",
-          liquidity: 100000000,
-          volume: 100000000,
-          fees: 100000000,
-          apr: 2335,
-        },
-      ],
+      // dataPools: [
+      //   {
+      //     poolName: "btc-usdc",
+      //     tokenA: "btc",
+      //     tokenB: "usdc",
+      //     liquidity: 100000000,
+      //     volume: 100000000,
+      //     fees: 100000000,
+      //     apr: 2335,
+      //   },
+      //   {
+      //     poolName: "btc-usdc",
+      //     tokenA: "btc",
+      //     tokenB: "usdc",
+      //     liquidity: 100000000,
+      //     volume: 100000000,
+      //     fees: 100000000,
+      //     apr: 2335,
+      //   },
+      //   {
+      //     poolName: "btc-usdc",
+      //     tokenA: "btc",
+      //     tokenB: "usdc",
+      //     liquidity: 100000000,
+      //     volume: 100000000,
+      //     fees: 100000000,
+      //     apr: 2335,
+      //   },
+      // ],
     }
   },
   head() {
@@ -169,15 +169,17 @@ export default {
       title,
     }
   },
+  beforeCreate () {
+     this.$liquidity.getPools()
+  },
   computed: {
     filterDataPools() {
-      let filters = this.dataPools
-      // search
-      if (this.filters.search) filters = filters.filter(data => `${data.tokenA}-${data.tokenB}`.includes(this.filters.search))
-      // filter pools
-      if (this.filters.pools === 'my pools') filters = filters.filter(data => data.mine)
-
-      return filters
+      if (!this.filters.search) {
+        return this.$liquidity.myPairs
+      }
+      return this.$liquidity.myPairs.filter(data => {
+        return data.poolName.toLowerCase().includes(this.filters.search.toLowerCase())
+      })
     },
   },
   methods: {

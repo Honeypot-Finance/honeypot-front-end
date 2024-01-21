@@ -1,7 +1,7 @@
 <template>
   <div id="pools-create" class="divcol" style="gap: 30px">
-    <ModalsTokens ref="tokens" :from="firstToken" :to="secondToken"></ModalsTokens>
-    
+    <ModalsTokens ref="tokens0" :token="$liquidity.token0" @select="(t) => $liquidity.token0=t" @switch="$liquidity.switchTokens()" :oppositeToken="$liquidity.token1" ></ModalsTokens>
+    <ModalsTokens ref="tokens1" :token="$liquidity.token1" @select="(t) => $liquidity.token1=t" @switch="$liquidity.switchTokens()" :oppositeToken="$liquidity.token0"></ModalsTokens>
     <section id="pools-create-header" class="divcol" style="gap: 10px">
       <label class="maxsize_w hover_arrowback pointer" style="--fs: 21px" @click="$router.push(localePath('/pools'))">
         <v-icon size="1.5em">mdi-chevron-left</v-icon>
@@ -10,7 +10,7 @@
 
       <v-card class="card space gap2" style="--br: 20px">
         <span v-if="!(firstToken.img && secondToken.img)" class="acenter" style="gap: 5px">Create a pool</span>
-        
+
         <span v-else class="acenter tup" style="gap: 5px">
           <img :src="firstToken.img" alt="token" style="--w: 1.72em; --of: cover">
           usdc /
@@ -32,7 +32,7 @@
         <span class="hspan mb-2" style="--fs: 28px; --fw: 700">
           {{!(firstToken.img && secondToken.img) ? 'Create a pool' : 'Add Liquidity'}}
         </span>
-        
+
         <p class="mb-8" style="max-width: 500px">
           {{
             !(firstToken.img && secondToken.img)
@@ -40,7 +40,7 @@
             : 'There is currently no liquidity'
           }}
         </p>
-        
+
         <img
           src="~/assets/sources/miscellaneous/locked-pools-test-img.jpg" alt="test image"
           style="--h: 123px; --ar: 1.75 / 1; border-radius: 0 !important; max-width: 201px !important"
@@ -55,12 +55,12 @@
             <label>TVL</label>
             <span class="hspan">$1.2M</span>
           </v-card>
-          
+
           <v-card class="card divcol center">
             <label>Pool APR</label>
             <span class="hspan">32%</span>
           </v-card>
-          
+
           <v-card class="card divcol center">
             <label>Fees</label>
             <span class="hspan">$1290</span>
@@ -96,18 +96,18 @@
                 <label>input</label>
                 <div class="fnowrap" style="gap: 10px; --fb: max-content">
                   <v-chip
-                    close close-icon="mdi-chevron-down" class="btn2 center" @click="$refs.tokens.openModalTokens(firstToken)"
-                    @click:close="$refs.tokens.openModalTokens(firstToken)">
+                    close close-icon="mdi-chevron-down" class="btn2 center" @click="$refs.tokens0.openModalTokens()"
+                    @click:close="$refs.tokens0.openModalTokens()">
                     <img
-                      v-if="firstToken.img" :src="firstToken.img" :alt="`${firstToken.name} token`"
+                      v-if="$liquidity.token0.logoURI" :src="$liquidity.token0.logoURI" :alt="`${$liquidity.token0.name} token`"
                       class="aspect mr-2" style="--w: 20px; --of: cover"
                     >
                     <div v-else class="card aspect mr-2" style="--w: 20px; --br: 50%; --bg: #fff; --p: 0" />
-                    
-                    <span class="tup">{{firstToken.name}}</span>
+
+                    <span class="tup">{{$liquidity.token0.name}}</span>
                   </v-chip>
-                  
-                  <v-btn class="btn2">
+
+                  <v-btn @click="() => $liquidity.token0Amount = $liquidity.token0.balance.toFixed(2)" class="btn2">
                     <span>max</span>
                   </v-btn>
                 </div>
@@ -116,19 +116,19 @@
               <v-card class="card divcol" style="--bg: #292724">
                 <div class="divcol">
                   <v-text-field
-                    v-model="firstToken.amount"
-                    solo counter
+                    v-model="$liquidity.token0Amount"
+                    solo
                     placeholder="0.00"
                     type="number"
                     class="custome"
                     @keyup="$event => $event.key === 'Enter' ? addLiquiidty() : ''"
                   >
-                    <template #counter>
-                      <label class="font1" style="--fs: max(18px, 1em)">~${{(firstToken.amount / 2).formatter(true) || 0}} USD</label>
-                    </template>
+                    <!-- <template #counter>
+                      <label class="font1" style="--fs: max(18px, 1em)">~${{($liquidity.token0Amount / 2).formatter(true) || 0}} USD</label>
+                    </template> -->
                   </v-text-field>
                 </div>
-                <label class="font1">Balance 112.390</label>
+                <label class="font1">Balance {{ $liquidity.token0.balance.toFormat(2) }}</label>
               </v-card>
             </aside>
 
@@ -144,17 +144,17 @@
                 <label>input</label>
                 <div class="fnowrap" style="gap: 10px; --fb: max-content">
                   <v-chip
-                    close close-icon="mdi-chevron-down" class="btn2 center" @click="$refs.tokens.openModalTokens(secondToken)"
-                    @click:close="$refs.tokens.openModalTokens(secondToken)">
+                    close close-icon="mdi-chevron-down" class="btn2 center" @click="$refs.tokens1.openModalTokens()"
+                    @click:close="$refs.tokens1.openModalTokens()">
                     <img
-                      v-if="secondToken.img" :src="secondToken.img" :alt="`${secondToken.name} token`"
+                      v-if="$liquidity.token1.logoURI" :src="$liquidity.token1.logoURI" :alt="`${$liquidity.token1.name} token`"
                       class="aspect mr-2" style="--w: 20px; --of: cover">
                     <div v-else class="card aspect mr-2" style="--w: 20px; --br: 50%; --bg: #fff; --p: 0" />
-                    
-                    <span class="tup">{{secondToken.name}}</span>
+
+                    <span class="tup">{{$liquidity.token1.name}}</span>
                   </v-chip>
-                  
-                  <v-btn class="btn2">
+
+                  <v-btn @click="() => $liquidity.token1Amount = $liquidity.token1.balance.toFixed(2)" class="btn2">
                     <span>max</span>
                   </v-btn>
                 </div>
@@ -163,44 +163,45 @@
               <v-card class="card divcol" style="--bg: #292724">
                 <div class="divcol">
                   <v-text-field
-                    v-model="secondToken.amount"
-                    solo counter
+                    v-model="$liquidity.token1Amount"
+                    solo
                     placeholder="0.00"
                     type="number"
                     class="custome"
                     @keyup="$event => $event.key === 'Enter' ? addLiquiidty() : ''"
                   >
-                    <template #counter>
-                      <label class="font1" style="--fs: max(18px, 1em)">~${{(secondToken.amount / 2).formatter(true) || 0}} USD</label>
-                    </template>
+                    <!-- <template #counter>
+                      <label class="font1" style="--fs: max(18px, 1em)">~${{($liquidity.token1AMount / 2).formatter(true) || 0}} USD</label>
+                    </template> -->
                   </v-text-field>
                 </div>
-                <label class="font1">Balance 112.390</label>
+                <label class="font1">Balance {{ $liquidity.token1.balance.toFormat(2) }}</label>
               </v-card>
             </aside>
           </div>
 
-          <v-card class="card space my-5 deletemobile" style="--bg: #292724; --br: 20px; --fs: 14px; gap: 10px">
+          <!-- <v-card class="card space my-5 deletemobile" style="--bg: #292724; --br: 20px; --fs: 14px; gap: 10px">
             <div class="divcol" style="gap: 5px">
               <span class="hspan" style="--fw: 700">1306.67</span>
               <span class="hspan" style="--fw: 400">BERA per HONEY</span>
             </div>
-            
+
             <div class="divcol" style="gap: 5px">
               <span class="hspan" style="--fw: 700">1306.67</span>
               <span class="hspan" style="--fw: 400">BERA per HONEY</span>
             </div>
-            
+
             <div class="divcol" style="gap: 5px">
               <span class="hspan" style="--fw: 700">0%</span>
               <span class="hspan" style="--fw: 400">Share of Pool</span>
             </div>
-          </v-card>
+          </v-card> -->
 
           <v-btn
-            :disabled="!(firstToken.amount && firstToken.img && secondToken.amount && secondToken.img)"
+            :disabled="!($liquidity.token0 && $liquidity.token1 && $liquidity.token0Amount && $liquidity.token1Amount)"
+            :loading="addLiquidityLoading"
             class="btn mb-3" style="--bg: #FFCD4D; --fs: 21px; --h: 51px"
-            @click="addLiquiidty($refs['form-pool'])"
+            @click="addLiquidity($refs['form-pool'])"
           >Add Liquidity</v-btn>
 
           <a class="hspan align" style="--c: var(--accent); --fs: 13px">
@@ -211,20 +212,20 @@
 
         <!-- remove tab -->
         <v-sheet v-else id="container-remove" class="divcol fill_w" color="transparent" style="gap: 20px">
-          <template v-if="!removeSelected">
-            <v-card v-for="(item, i) in poolList" :key="i" class="card space" style="--b: 3px solid #292724; --br: 20px; --p: 20px; --h: 85px">
+          <template v-if="!$liquidity.currentRemovePair">
+            <v-card :loading="$liquidity.liquidityLoading" v-for="(item, i) in $liquidity.myPairs" :key="i" class="card space" style="--b: 3px solid #292724; --br: 20px; --p: 20px; --h: 85px">
               <div class="center font2" style="gap: 10px">
-                <v-sheet class="dual-tokens" color="transparent">
+                <!-- <v-sheet class="dual-tokens" color="transparent">
                   <img :src="require(`~/assets/sources/tokens/${item.tokenA}.svg`)" :alt="`${item.tokenA} token`" class="aspect">
                   <img :src="require(`~/assets/sources/tokens/${item.tokenB}.svg`)" :alt="`${item.tokenB} token`" class="aspect">
-                </v-sheet>
-                
+                </v-sheet> -->
+
                 <span class="hspan tup" style="--fs: 21px; --fw: 700">{{item.poolName}}</span>
               </div>
-              
+
               <v-btn
                 class="btn2 font3" style="--b: 1px solid #292724; --br: 30px; --p: 11px 12px"
-                @click="removeSelected = item"
+                @click="$liquidity.currentRemovePair = item"
               >
                 <span style="--c: var(--accent); --fw: 500: --fs: 14">Remove</span>
               </v-btn>
@@ -248,30 +249,30 @@
             <v-sheet class="card divcol align my-3" style="--br: 10px; --bg: #292724; --p: 1.1em; gap: 15px; --max-w: 362px; --w: 100%">
               <div class="space" style="gap: 20px">
                 <div class="center font2" style="gap: 10px">
-                  <img
+                  <!-- <img
                     :src="require(`~/assets/sources/tokens/${removeSelected.tokenA}.svg`)" :alt="`${removeSelected.tokenA} token`"
                     style="--w: 27.79px; --of: cover"
-                  >
-                  <span class="hspan tup" style="--fs: 21px; --fw: 700">{{removeSelected.tokenA}}</span>
+                  > -->
+                  <span class="hspan tup" style="--fs: 21px; --fw: 700">{{$liquidity.currentRemovePair.token0.name}}</span>
                 </div>
-                
-                <span class="hspan" style="--fs: 14px">0.029021</span>
+
+                <span class="hspan" style="--fs: 14px">{{ $liquidity.currentRemovePair.token0LpBalance.toFixed(2) }}</span>
               </div>
 
               <div class="space" style="gap: 20px">
                 <div class="center font2" style="gap: 10px">
-                  <img
+                  <!-- <img
                     :src="require(`~/assets/sources/tokens/${removeSelected.tokenB}.svg`)" :alt="`${removeSelected.tokenB} token`"
                     style="--w: 27.79px; --of: cover"
-                  >
-                  <span class="hspan tup" style="--fs: 21px; --fw: 700">{{removeSelected.tokenB}}</span>
+                  > -->
+                  <span class="hspan tup" style="--fs: 21px; --fw: 700">{{$liquidity.currentRemovePair.token1.name}}</span>
                 </div>
-                
-                <span class="hspan" style="--fs: 14px">0.029021</span>
+
+                <span class="hspan" style="--fs: 14px">{{ $liquidity.currentRemovePair.token1LpBalance.toFixed(2) }}</span>
               </div>
             </v-sheet>
 
-            <v-btn class="btn" style="--w: 100%; --h: 51px; --fs: 21px">
+            <v-btn @click="removeLiquidity()"  :loading="removeLiquidityLoading" class="btn" style="--w: 100%; --h: 51px; --fs: 21px">
               Withdraw
             </v-btn>
           </template>
@@ -287,8 +288,11 @@ import computeds from '~/mixins/computeds'
 export default {
   name: "PoolsCreatePage",
   mixins: [computeds],
+
   data() {
     return {
+      addLiquidityLoading: false,
+      removeLiquidityLoading: false,
       dataControls: ["create", "remove"],
       currentTab: 0,
       firstToken: {
@@ -302,48 +306,69 @@ export default {
         amount: undefined,
       },
       isLiquidityAdded: false,
-      poolList: [
-        {
-          tokenA: "btc",
-          tokenB: "usdc",
-          poolName: "btc-usdc",
-        },
-        {
-          tokenA: "hny",
-          tokenB: "database",
-          poolName: "hny-bear",
-        },
-        {
-          tokenA: "btc",
-          tokenB: "usdc",
-          poolName: "btc-usdc",
-        },
-      ],
+      // poolList: [
+      //   {
+      //     tokenA: "btc",
+      //     tokenB: "usdc",
+      //     poolName: "btc-usdc",
+      //   },
+      //   {
+      //     tokenA: "hny",
+      //     tokenB: "database",
+      //     poolName: "hny-bear",
+      //   },
+      //   {
+      //     tokenA: "btc",
+      //     tokenB: "usdc",
+      //     poolName: "btc-usdc",
+      //   },
+      // ],
       removeSelected: undefined,
       dataWithdrawPercent: [25, 50, 75, 100],
       withdrawSelected: 50,
     }
   },
+
   head() {
     const title = 'Create Pools';
     return {
       title,
     }
   },
+
   watch: {
     currentTab() {
       this.removeSelected = undefined
     }
   },
+  beforeCreate () {
+     this.$liquidity.getPools()
+  },
   methods: {
-    addLiquiidty() {
-      if (!(this.firstToken.amount && this.firstToken.img && this.secondToken.amount && this.secondToken.img)) return;
-      else if (!(this.firstToken.img && this.secondToken.img)) return this.$alert("cancel", "You must to select tokens to pool")
-      
-      this.isLiquidityAdded = true
+    async addLiquidity() {
+      if (!this.$liquidity.currentPair) {
+        this.$alert("cancel", "There are no pairs for this token")
+        return
+      }
+      this.addLiquidityLoading = true
+      await this.$liquidity.currentPair.addLiquidity(this.$liquidity.token0Amount, this.$liquidity.token1Amount)
+      this.addLiquidityLoading = false
       this.$alert("success", "Liquidity added successfuly")
+      await this.$liquidity.getPools()
     },
-  }
+    async removeLiquidity() {
+      // if (!this.$liquidity.currentPair) {
+      //   this.$alert("cancel", "There are no pairs for this token")
+      //   return
+      // }
+      this.removeLiquidityLoading = true
+      await this.$liquidity.currentPair.removeLiquidity(this.withdrawSelected)
+      this.removeLiquidityLoading = false
+      this.$alert("success", "Liquidity removed successfuly")
+      await this.$liquidity.getPools()
+    },
+  },
+
 };
 </script>
 

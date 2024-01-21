@@ -1,21 +1,63 @@
 module.exports = {
-  root: true,
-  env: {
-    browser: true,
-    node: true,
+  "root": true,
+  "env": {
+    "browser": true,
+    "node": true
   },
-  parserOptions: {
-    parser: '@babel/eslint-parser',
-    requireConfigFile: false,
-  },
-  extends: ['@nuxtjs', 'plugin:nuxt/recommended', 'prettier'],
-  plugins: [],
-  // add your custom rules here
-  rules: {
+  // "parserOptions": {
+  //   "parser": "@babel/eslint-parser",
+  //   "requireConfigFile": false
+  // },
+  "extends": [
+    "@nuxtjs",
+    "plugin:nuxt/recommended",
+    "prettier",
+    "@nuxtjs/eslint-config-typescript"
+  ],
+  "plugins": [],
+  "rules": {
+    "multiline-ternary": "off",
+    "import/named": "off",
+    "import/no-named-as-default": "off",
+    "no-useless-return": "off",
+    "import/first": "off",
+    "require-await": "off",
+    "lines-between-class-members": "off",
+    "spaced-comment": "off",
+    "brace-style": "off",
+    "no-trailing-spaces": "off",
+    "arrow-parens": "off",
+    "object-curly-spacing": "off",
+    "@typescript-eslint/no-unused-vars": "off",
+    "comma-spacing": "off",
+    "space-infix-ops": "off",
+    "space-in-parens": "off",
+    "no-multi-spaces": "off",
+    "curly": "off",
+    "no-multiple-empty-lines": "off",
+    "vue/max-attributes-per-line": "off",
+    "vue/html-self-closing": "off",
+    "keyword-spacing": "off",
+    "padded-blocks": "off",
+    "vue/html-indent": "off",
+    "no-tabs": "off",
+    "key-spacing": "off",
+    "@typescript-eslint/no-var-requires": "off",
+    "space-before-blocks": "off",
+    "semi": "off",
     "no-console": "off",
     "vue/no-v-html": "off",
     "no-new-object": "off",
     "no-extend-native": "off",
     "one-var": "off",
-  },
+    "comma-dangle": "off",
+    "quotes": 0,
+    "indent": 0,
+    "quote-props": 0,
+    "space-before-function-paren": 0,
+    "eol-last": 0,
+    "operator-linebreak": 0,
+    "block-spacing": 0,
+    "import/order": 0
+  }
 }

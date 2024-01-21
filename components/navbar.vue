@@ -1,7 +1,7 @@
 <template>
   <div>
     <MenuNavbar ref="menu"></MenuNavbar>
-    
+
     <v-app-bar id="navbar" color="transparent" absolute class="isolate">
       <!-- desktop -->
       <nuxt-link class="deletemobile" :to="localePath('/swap')">
@@ -37,11 +37,11 @@
               v-bind="isLogged ? attrs : ''"
               v-on="isLogged ? on : ''"
               @click="!isLogged ? $store.dispatch('modalConnect') : ''">
-              <template v-if="isLogged">
-                <span>{{user.accountId}}</span>
+              <template v-if="$wallet.isConnect">
+                <span>{{$wallet.accountShort}}</span>
                 <v-icon>mdi-chevron-down</v-icon>
               </template>
-              
+
               <template v-else>Connect wallet</template>
             </v-btn>
           </template>
@@ -75,7 +75,32 @@ export default {
   mixins: [computeds, menuLogin],
   data() {
     return {
-      dataNavbar: [
+      dataNavbar: process.env.CHAIN_ENV === 'test' ? [
+        {
+          name: "portfolio",
+          to: "/portfolio"
+        },
+        {
+          name: "swap",
+          to: "/swap"
+        },
+        {
+          name: "farm",
+          to: "/farm"
+        },
+        {
+          name: "faucet",
+          to: "/faucet"
+        },
+        {
+          name: "pools",
+          to: "/pools"
+        },
+        {
+          name: "xhpot",
+          to: "/staking"
+        },
+      ] : [
         {
           name: "portfolio",
           to: "/portfolio"

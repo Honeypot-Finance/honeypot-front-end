@@ -4,7 +4,7 @@
     <ModalsConnect ref="connect" />
     <Navbar ref="navbar" />
     <ModalsSwapModal ref="swap" />
-    
+
     <v-main :class="wrapperSpace?'with':'without'" class="parent">
       <!-- floating swap button -->
       <v-btn
@@ -28,7 +28,7 @@
               {{user.accountId}}
               <v-icon>mdi-chevron-down</v-icon>
             </template>
-            
+
             <template v-else>Connect wallet</template>
           </v-btn>
         </template>
@@ -65,6 +65,9 @@ export default {
       wrapperSpace: true,
     }
   },
+  beforeCreate () {
+  },
+
   created() {
     // get data profile
     // this.$store.dispatch("getData");
@@ -72,7 +75,7 @@ export default {
   mounted() {
     this.scrollX();
     // this.footerHeightListener();
-    
+
     // resize listener
     // window.addEventListener("resize", this.footerHeightListener);
   },

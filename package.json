@@ -13,13 +13,21 @@
     "lintfix": "prettier --write --list-different . && npm run lint:js -- --fix"
   },
   "dependencies": {
+    "@metamask/sdk": "^0.14.2",
     "@nuxtjs/axios": "^5.13.6",
     "@nuxtjs/i18n": "^7.3.0",
+    "@uniswap/v2-core": "^1.0.1",
     "@walletconnect/web3-provider": "^1.8.0",
+    "bignumber.js": "^9.1.2",
     "core-js": "^3.19.3",
+    "ethcall": "4.8.13",
+    "ethers": "5.7.2",
+    "eventemitter3": "^5.0.1",
     "html2canvas": "^1.4.1",
+    "lodash": "^4.17.21",
     "near-api-js": "^1.0.0",
     "nuxt": "^2.15.8",
+    "p-retry": "^5.1.2",
     "parallax-js": "^3.1.0",
     "vue": "^2.6.14",
     "vue-advanced-chat": "^2.0.1",
@@ -35,14 +43,24 @@
     "webpack": "^4.46.0"
   },
   "devDependencies": {
+    "@babel/core": "^7.23.7",
     "@babel/eslint-parser": "^7.16.3",
+    "@babel/helper-plugin-utils": "^7.22.5",
+    "@babel/types": "^7.23.6",
+    "@nuxt/types": "^2.17.3",
+    "@nuxt/typescript-build": "^3.0.2",
     "@nuxtjs/eslint-config": "^8.0.0",
+    "@nuxtjs/eslint-config-typescript": "^12.1.0",
     "@nuxtjs/eslint-module": "^3.0.2",
+    "@nuxtjs/tailwindcss": "^6.10.4",
     "@nuxtjs/vuetify": "^1.12.3",
+    "@types/node": "^20.11.5",
     "eslint": "^8.4.1",
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-nuxt": "^3.1.0",
     "eslint-plugin-vue": "^8.2.0",
-    "prettier": "^2.5.1"
+    "fast-glob": "^3.3.2",
+    "prettier": "^2.5.1",
+    "typescript": "^5.3.3"
   }
 }

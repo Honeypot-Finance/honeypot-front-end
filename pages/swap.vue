@@ -1,8 +1,11 @@
 <template>
   <div id="swap">
     <ModalsSwap ref="modal"></ModalsSwap>
-    <ModalsTokens ref="tokens" :from="swapFrom" :to="swapTo"></ModalsTokens>
-    
+    <ModalsTokens ref="fromTokens" @select="onFromSelect" :token="$swap.fromToken" :oppositeToken="$swap.toToken" @switch="$swap.switchTokens()" ></ModalsTokens>
+    <ModalsTokens ref="toTokens" @select="(token) => {
+      $swap.toToken = token
+    }" :token="$swap.toToken" @switch="$swap.switchTokens()"  :oppositeToken="$swap.fromToken"></ModalsTokens>
+
     <section id="swap-header" class="divcol center">
       <h1>Swap</h1>
       <h2>Swap tokens instantly</h2>
@@ -19,31 +22,29 @@
       <v-form ref="form-swap" class="middle divcol jspace" style="gap: 12px" @submit.prevent="swap()">
         <div class="fnowrap space" style="gap: inherit">
           <!-- card swap left -->
-          <aside
-            id="swapFrom" class="target_drag divcol" style="gap: inherit"
+          <aside id="swapFrom" class="target_drag divcol" style="gap: inherit"
             @dragover="($event) => $event.preventDefault()" @drop="dropToken($event)">
             <div class="container-options">
               <label>From</label>
               <div class="space">
-                <v-chip
-                  close close-icon="mdi-chevron-down" class="btn2" @click="$refs.tokens.openModalTokens(swapFrom)"
-                  @click:close="$refs.tokens.openModalTokens(swapFrom)">
+                <v-chip close close-icon="mdi-chevron-down" class="btn2" @click="$refs.fromTokens.openModalTokens($swap.fromToken)"
+                  @click:close="$refs.fromTokens.openModalTokens($swap.fromToken)">
                   <v-img class="aspect mr-2" style="--w: 20px">
                     <template #default>
-                      <img :src="swapFrom.img" :alt="`${swapFrom.name} token`" style="--w: 100%; --of: cover">
+                      <img :src="$swap.fromToken.logoURI" :alt="`${$swap.fromToken.name} token`" style="--w: 100%; --of: cover">
                     </template>
                     <template #placeholder>
                       <v-skeleton-loader type="avatar" />
                     </template>
                   </v-img>
-                  <span>{{swapFrom.name}}</span>
+                  <span>{{ $swap.fromToken.name }}</span>
                 </v-chip>
 
                 <div class="center" style="gap: 10px">
-                  <v-btn class="btn2">
+                  <v-btn @click="halfAmount" class="btn2">
                     <span>half</span>
                   </v-btn>
-                  <v-btn class="btn2">
+                  <v-btn @click="maxAmount" class="btn2">
                     <span>max</span>
                   </v-btn>
                 </div>
@@ -52,50 +53,41 @@
 
             <v-card class="card">
               <div class="divcol">
-                <v-text-field
-                  v-model="swapFrom.amount"
-                  solo counter
-                  placeholder="0.00"
-                  type="number"
-                  class="custome"
-                  @input="calcPriceTo($event)"
-                  @keyup="$event => $event.key === 'Enter' ? swap() : ''"
-                >
-                  <template #counter>
-                    <label class="font1" style="--fs: 21px">~${{(swapFrom.amount / 2).formatter(true) || 0}} USD</label>
-                  </template>
+                <v-text-field v-model="$swap.fromAmount" solo placeholder="0.00" type="number" class="custome"
+                  @input="calcPriceTo($event)" @keyup="$event => $event.key === 'Enter' ? swap() : ''">
+                  <!-- <template #counter>
+                    <label class="font1" style="--fs: 21px">~${{ ($swap.fromAmount / 2).formatter(true) || 0 }} USD</label>
+                  </template> -->
                 </v-text-field>
               </div>
-              <label class="font1">Balance 112.390</label>
+              <label class="font1">Balance {{ $swap.fromToken.balance.toFixed(2) }}</label>
             </v-card>
           </aside>
 
           <center>
-            <v-btn icon style="--p: 7px" @click="switchTokens()">
+            <v-btn icon style="--p: 7px" @click="$swap.switchTokens()">
               <img src="~/assets/sources/icons/swap-arrow.svg" alt="switch icon" style="--w: 16px">
             </v-btn>
           </center>
 
           <!-- card swap right -->
-          <aside
-            id="swapTo" class="target_drag divcol" style="gap: inherit"
+          <aside id="swapTo" class="target_drag divcol" style="gap: inherit"
             @dragover="($event) => $event.preventDefault()" @drop="dropToken($event)">
             <div class="container-options">
               <label>To</label>
               <div class="space">
-                <v-chip
-                  close close-icon="mdi-chevron-down" class="tup btn2" @click="$refs.tokens.openModalTokens(swapTo)"
-                  @click:close="$refs.tokens.openModalTokens(swapTo)">
+                <v-chip close close-icon="mdi-chevron-down" class="tup btn2" @click="$refs.toTokens.openModalTokens($swap.toToken)"
+                  @click:close="$refs.toTokens.openModalTokens($swap.toToken)">
                   <v-img class="aspect mr-2" style="--w: 20px">
                     <template #default>
-                      <img :src="swapTo.img" :alt="`${swapTo.name} token`" style="--w: 100%; --of: cover">
+                      <img :src="$swap.toToken.logoURI" :alt="`${$swap.toToken.name} token`" style="--w: 100%; --of: cover">
                     </template>
-                    
+
                     <template #placeholder>
                       <v-skeleton-loader type="avatar" />
                     </template>
                   </v-img>
-                  <span>{{swapTo.name}}</span>
+                  <span>{{ $swap.toToken.name }}</span>
                 </v-chip>
                 <v-btn class="btn2" @click.stop="$refs.modal.modalSettings = true">
                   <img src="~/assets/sources/icons/settings.svg" alt="settings" style="--w: 18px">
@@ -105,25 +97,19 @@
 
             <v-card class="card">
               <div class="divcol">
-                <v-text-field
-                  v-model="swapTo.amount"
-                  solo counter
-                  placeholder="0.00"
-                  type="number"
-                  class="custome"
-                  disabled
-                >
-                  <template #counter>
-                    <label class="font1" style="--fs: 21px">~${{(swapTo.amount / 2).formatter(true) || 0}} USD</label>
-                  </template>
+                <v-text-field v-model="$swap.toAmount" solo  placeholder="0.00" type="number" class="custome"
+                  disabled>
+                  <!-- <template #counter>
+                    <label class="font1" style="--fs: 21px">~${{ ($swap.toAmount / 2).formatter(true) || 0 }} USD</label>
+                  </template> -->
                 </v-text-field>
               </div>
-              <label class="font1">Balance 112.390</label>
+              <label class="font1">Balance {{ $swap.toToken.balance.toFixed(2) }}</label>
             </v-card>
           </aside>
         </div>
 
-        <v-btn class="btn stylish" :disabled="!(swapFrom.amount && swapTo.amount)" @click="swap()">swap</v-btn>
+        <v-btn class="btn stylish" :disabled="!($swap.fromAmount && $swap.toAmount)" @click="swap()">swap</v-btn>
       </v-form>
 
 
@@ -133,21 +119,18 @@
           <h3 class="p" style="--fw: 700">Trending Coins</h3>
           <label>Drag your token to swap</label>
         </div>
-        
-        <div
-          class="grid" style="gap: inherit"
-          @dragstart="dragstart($event)" @dragend="dragend($event)">
+
+        <div class="grid" style="gap: inherit" @dragstart="dragstart($event)" @dragend="dragend($event)">
           <div v-for="(item, i) in dataTokens" :key="i" class="divcol center">
             <v-img class="aspect" style="--w: 50px">
               <template #default>
-                <img
-                  v-show="item.img" :src="item.img" :alt="`${item.name} token`" style="--w: 100%; --of: cover">
+                <img v-show="item.logoURI" :src="item.logoURI" :alt="`${item.name} token`" style="--w: 100%; --of: cover">
               </template>
               <template #placeholder>
                 <v-skeleton-loader type="avatar" />
               </template>
             </v-img>
-            <label class="tup">{{item.name}}</label>
+            <label class="tup">{{ item.name }}</label>
           </div>
         </div>
       </v-card>
@@ -157,46 +140,48 @@
 
 <script>
 import computeds from '~/mixins/computeds'
+// import {walletConnect} from '~/services/wallet-connect'
 // import isMobile from '~/mixins/isMobile'
-
+import { liquidity } from '../services/liquidity';
 export default {
   name: "SwapPage",
   mixins: [computeds],
   data() {
     return {
+      // walletConnect,
       heightChart: undefined,
-      swapFrom: {
-        img: require('~/assets/sources/tokens/database.svg'),
-        name: "bear",
-        amount: undefined,
-      },
-      swapTo: {
-        img: require('~/assets/sources/tokens/btc.svg'),
-        name: "btc",
-        amount: undefined,
-      },
-      dataTokens: [
-        {
-          img: require('~/assets/sources/tokens/hny.svg'),
-          name: "hny",
-        },
-        {
-          img: require('~/assets/sources/tokens/usdc.svg'),
-          name: "usdc",
-        },
-        {
-          img: require('~/assets/sources/tokens/btc.svg'),
-          name: "btc",
-        },
-        {
-          img: require('~/assets/sources/tokens/database.svg'),
-          name: "coin name",
-        },
-        {
-          img: require('~/assets/sources/tokens/database.svg'),
-          name: "coin name",
-        },
-      ],
+      // swapFrom: {
+      //   img: require('~/assets/sources/tokens/database.svg'),
+      //   name: "bear",
+      //   amount: undefined,
+      // },
+      // swapTo: {
+      //   img: require('~/assets/sources/tokens/btc.svg'),
+      //   name: "btc",
+      //   amount: undefined,
+      // },
+      // dataTokens: [
+      //   {
+      //     img: require('~/assets/sources/tokens/hny.svg'),
+      //     name: "hny",
+      //   },
+      //   {
+      //     img: require('~/assets/sources/tokens/usdc.svg'),
+      //     name: "usdc",
+      //   },
+      //   {
+      //     img: require('~/assets/sources/tokens/btc.svg'),
+      //     name: "btc",
+      //   },
+      //   {
+      //     img: require('~/assets/sources/tokens/database.svg'),
+      //     name: "coin name",
+      //   },
+      //   {
+      //     img: require('~/assets/sources/tokens/database.svg'),
+      //     name: "coin name",
+      //   },
+      // ],
       currentDrag: undefined,
     }
   },
@@ -206,21 +191,29 @@ export default {
       title,
     }
   },
+  // computed: {
+  //   observerTokensFrom() {
+  //     return this.swapFrom.name
+  //   },
+  // },
+  // watch: {
+  //   observerTokensFrom(current, old) {
+  //     if (current !== old) {
+  //       // height cards
+  //       const
+  //         page = document.querySelector("#swap"),
+  //         cardLeft = page.querySelector("aside#swapFrom");
+  //       setTimeout(() => page.style.setProperty("--h-cards", `${cardLeft.getBoundingClientRect().height}px`), 100);
+  //     }
+  //   },
+  // },
   computed: {
-    observerTokensFrom() {
-      return this.swapFrom.name
-    },
+    dataTokens () {
+      return this.$wallet.currentNetwork.tokens
+    }
   },
-  watch: {
-    observerTokensFrom(current, old) {
-      if (current !== old) {
-        // height cards
-        const
-          page = document.querySelector("#swap"),
-          cardLeft = page.querySelector("aside#swapFrom");
-        setTimeout(() => page.style.setProperty("--h-cards", `${cardLeft.getBoundingClientRect().height}px`), 100);
-      }
-    },
+  beforeCreate () {
+    this.$liquidity.getPools()
   },
   mounted() {
     this.styles()
@@ -229,9 +222,22 @@ export default {
   beforeDestroy() {
     window.removeEventListener("resize", this.styles)
   },
+
   methods: {
+    halfAmount () {
+      this.$swap.fromAmount = this.$swap.fromToken.balance.div(2).toFixed(2)
+      this.calcPriceTo()
+    },
+    maxAmount () {
+      this.$swap.fromAmount = this.$swap.fromToken.balance.toFixed(2)
+      this.calcPriceTo()
+    },
+    onFromSelect(token) {
+      this.$swap.fromToken = token
+    },
     styles() {
       // height chart calculator
+      console.log('this.$refs.target_swap_chart', this.$refs)
       const
         container = this.$refs.target_swap_chart.$el,
         header = container.querySelector(".charts-header"),
@@ -240,10 +246,6 @@ export default {
         ${container.getBoundingClientRect().height -
         (header.getBoundingClientRect().height + footer.getBoundingClientRect().height + 48 + 15)}px
       `
-    },
-    switchTokens() {
-      [this.swapFrom.img, this.swapFrom.name, this.swapTo.img, this.swapTo.name]
-      = [this.swapTo.img, this.swapTo.name, this.swapFrom.img, this.swapFrom.name]
     },
     dragstart(event) {
       if (event.target?.alt) {
@@ -262,24 +264,26 @@ export default {
         token = this[event.path.find(e => e.className.includes("target_drag")).id],
         [otherToken] = data.filter(el => el.name !== token.name && el.img !== token.img);
 
-      if (otherToken?.name === this.currentDrag?.alt?.split(" token")[0]) { this.switchTokens() }
+      if (otherToken?.name === this.currentDrag?.alt?.split(" token")[0]) { this.$swap.switchTokens() }
       else {
         token.img = this.currentDrag.src
-        token.name = this.currentDrag.alt.split(" token")[0]
+        token.name = this.currentDrag.alt.split("token")[0]
       }
     },
     calcPriceTo(event) {
-      const item = this.swapFrom
-      console.log(item)
-      this.swapTo.amount = (event / 1.5).toFixed(2)
+      if (!this.$swap.currentPair) {
+         this.$alert('cancel', 'No liquidity found for this pair')
+         return
+      }
+      this.$swap.toAmount = this.$swap.currentPair.getToAmount(this.$swap.fromAmount)
     },
     swap() {
-      if (!(this.swapFrom.amount && this.swapTo.amount)) return;
+      if (!(this.$swap.fromAmount && this.$swap.toAmount)) return;
       const data = {
-        tokenFrom: this.swapFrom.name,
-        priceFrom: this.swapFrom.amount,
-        tokenTo: this.swapTo.name,
-        priceTo: this.swapTo.amount,
+        tokenFrom: this.$swap.fromToken.name,
+        priceFrom: this.$swap.fromAmount,
+        tokenTo:  this.$swap.toToken.name,
+        priceTo: this.$swap.toAmount,
       }
 
       this.$store.commit("setSwapReview", data)

@@ -4,7 +4,7 @@
       <v-btn icon class="absolute hover_arrowback" style="--r: auto" @click="$router.push(localePath('/swap'))">
         <v-icon>mdi-chevron-left</v-icon>
       </v-btn>
-      
+
       <h2 class="p" style="--fs: 16px; --fw: 500">Confirm Swap</h2>
     </section>
 
@@ -12,31 +12,31 @@
       <section class="divcol" style="gap: 10px">
         <div class="divcol" style="gap: inherit">
           <label style="--c: hsl(225 225% 225% / .56); --fs: 16px">From</label>
-          <span class="hspan tup">{{review.priceFrom}} {{review.tokenFrom}}</span>
+          <span class="hspan tup">{{ review.priceFrom }} {{ review.tokenFrom }}</span>
         </div>
-        
+
         <div class="divcol" style="gap: inherit">
           <label style="--c: hsl(225 225% 225% / .56); --fs: 16px">To</label>
-          <span class="hspan tup">{{review.priceTo}} {{review.tokenTo}}</span>
+          <span class="hspan tup">{{ review.priceTo }} {{ review.tokenTo }}</span>
         </div>
       </section>
 
 
       <section class="divcol anchorline" style="gap: 10px; --b: auto; padding-top: var(--distance)">
-        <div class="space" style="gap: inherit">
+        <!-- <div class="space" style="gap: inherit">
           <label style="--c: hsl(225 225% 225% / .56); --fs: 13px">Price</label>
           <span class="hspan" style="--fs: 13px">0.0001234 HONEY per NAME</span>
-        </div>
-        
+        </div> -->
+
         <div class="space" style="gap: inherit">
           <label style="--c: hsl(225 225% 225% / .56); --fs: 13px">Minimum Received</label>
-          <span class="hspan" style="--fs: 13px">{{review.priceTo}} {{review.tokenTo}}</span>
+          <span class="hspan" style="--fs: 13px">{{ review.priceTo }} {{ review.tokenTo }}</span>
         </div>
-        
+        <!--
         <div class="space" style="gap: inherit">
           <label style="--c: hsl(225 225% 225% / .56); --fs: 13px">Fee Estimate</label>
           <span class="hspan" style="--fs: 13px">$0.00</span>
-        </div>
+        </div> -->
       </section>
 
       <v-btn class="btn stylish" @click="confirm()">swap</v-btn>
@@ -66,9 +66,18 @@ export default {
     }
   },
   methods: {
-    confirm() {
-      this.$alert("success")
-      this.$router.push(this.localePath('/swap'))
+    async confirm() {
+      try {
+        await this.$swap.swapExactTokensForTokens()
+        this.$alert("success")
+        this.$router.push(this.localePath('/swap'))
+      } catch (error) {
+        // console.log('error.toString()', error.toString(), error)
+        // const errorJSON = JSON.parse(error.toString().split("Internal JSON-RPC error.")[1])
+        this.$alert('cancel',error.toString())
+      }
+
+
     },
   }
 };

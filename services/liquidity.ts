@@ -1,0 +1,130 @@
+
+import IUniswapV2Pair from '@uniswap/v2-core/build/IUniswapV2Pair.json'
+// import scrollTokens from '~/static/tokens/scroll_tokens.json'
+// import scrollSepoliaTokens from '~/static/tokens/scroll_alpha_tokens.json'
+import { wallet } from "./wallet";
+import { Token } from "./contract/token";
+import Vue from "vue";
+import { BaseContract } from "./contract";
+import { ethers } from "ethers";
+import { PairContract } from "./contract/pair-contract";
+import BigNumber from "bignumber.js";
+import { makeAutoObservable } from '~/lib/observer';
+import { when } from '~/lib/event';
+
+const tokensConfig = {
+  // [mainNetwork.chainId]: scrollTokens,
+  // [testNetwork.chainId]: scrollSepoliaTokens
+}
+
+class Pair {
+   address: string
+   contract: BaseContract
+}
+
+class Liquidity {
+   pairs: PairContract[] = []
+   myPairs: PairContract[] = []
+   pairsByToken: Record<string, PairContract> = {}
+   token0: Token = wallet.currentNetwork.tokens[0]
+   token1: Token = wallet.currentNetwork.tokens[1]
+
+   token0Amount: string = ''
+   token1Amount: string = ''
+
+   liquidityLoading = false
+
+   currentRemovePair: PairContract | null = null
+
+   get tokens () {
+    return tokensConfig[wallet.currentChainId].map(t => new Token(t))
+   }
+
+   get routerV2Contract () {
+    return wallet.currentNetwork.contracts.routerV2
+   }
+
+   get factoryContract () {
+    return wallet.currentNetwork.contracts.factory
+   }
+
+   get currentPair () {
+    if (!this.token0 || !this.token1) {
+      return null
+    }
+    return this.pairsByToken[`${this.token0.address}-${this.token1.address}`]
+   }
+
+
+
+   constructor() {
+    makeAutoObservable(this)
+   }
+
+   switchTokens() {
+    const token0 = this.token0
+    this.token0 = this.token1
+    this.token1 = token0
+  }
+
+
+   async getPools() {
+    this.liquidityLoading = true
+    const poolsLength = await this.factoryContract.contract.allPairsLength()
+    const poolAddresses = await Promise.all(Array.from({ length: poolsLength }).map((i,index) => {
+      return this.factoryContract.contract.allPairs(index)
+    }))
+    this.pairs = poolAddresses.map((poolAddress) => {
+      const pairContract = new PairContract({
+        address: poolAddress,
+      })
+      return pairContract
+    })
+    this.pairsByToken = (await Promise.all(this.pairs.map(async (pair) => {
+      await when(() => pair.isInit)
+      return pair
+   }))).reduce((acc,cur) => {
+      acc[`${cur.token0.address}-${cur.token1.address}`] = cur
+      return acc
+   }, {})
+    this.myPairs = (await Promise.all(this.pairs.map(async (pair) => {
+      await when(() => pair.token.isInit)
+      return pair
+   }))).filter((pair) => pair.token.balance.gt(0))
+   this.liquidityLoading = false
+  }
+
+
+
+
+  // async getPairs () {
+  //   const pair = {}
+  //   pair.address = await factoryContract.contract.allPairs().call()
+  //   const balance = await this.balanceOf(pair.address)
+  //     const userHasBalance = balance > 0
+  //     if(userHasBalance) {
+
+  //       const pairContract = new web3.eth.Contract(IUniswapV2Pair.abi, pair.address);
+  //       const [token0Address, token1Address] = await Promise.all([
+  //       pairContract.methods.token0().call(),
+  //       pairContract.methods.token1().call()])
+
+  //       const [token0, token1, {LPtoken0Balance, LPtoken1Balance}] = await Promise.all([
+  //         this.getTokenData(token0Address),
+  //         this.getTokenData(token1Address),
+  //         this.getUserPoolBalance(pair.address)
+  //       ])
+  //       pair.token0 = token0
+  //       pair.token0Balance = LPtoken0Balance / 10 ** token0.decimals
+  //       pair.token1 = token1
+  //       pair.token1Balance = LPtoken1Balance / 10 ** token1.decimals
+  //       pair.poolName = pair.token0.symbol + "-" + pair.token1.symbol
+  //   }
+  //   return pair
+  //  }
+
+}
+
+
+export const liquidity = new Liquidity()
+Vue.prototype.$liquidity = liquidity

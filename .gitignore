@@ -68,7 +68,7 @@ typings/
 # nuxt.js build output
 .nuxt
 
-# # Nuxt generate  <--- comment 
+# # Nuxt generate  <--- comment
 # dist
 
 # vuepress build output
@@ -94,3 +94,4 @@ sw.*
 
 # personal notes files
 .notes
+.generate
