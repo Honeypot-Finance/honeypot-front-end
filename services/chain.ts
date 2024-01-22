@@ -31,7 +31,7 @@ export class Network {
 
 export const PolygonTestNetwork =  new Network({
   chainId: '0x13881',
-  rpcUrls: ['https://endpoints.omniatech.io/v1/matic/mumbai/public'],
+  rpcUrls: ['https://polygon-mumbai-pokt.nodies.app'],
   chainName: 'Mumbai',
   blockExplorerUrls:['https://mumbai.polygonscan.com'],
   nativeCurrency: {

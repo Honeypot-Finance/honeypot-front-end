@@ -110,38 +110,43 @@ class Liquidity {
   }
 
   async getPools() {
-    this.liquidityLoading = true
-    const poolsLength = await this.factoryContract.contract.allPairsLength()
-    const poolAddresses = await Promise.all(
-      Array.from({ length: poolsLength }).map((i, index) => {
-        return this.factoryContract.contract.allPairs(index)
-      })
-    )
-    const pairs = poolAddresses.map((poolAddress) => {
-      const pairContract = new PairContract({
-        address: poolAddress,
-      })
-      return pairContract
-    })
-    this.pairsByToken = (
-      await Promise.all(
-        this.pairs.map(async (pair) => {
-          await when(() => pair.isInit)
-          return pair
+    try {
+      this.liquidityLoading = true
+      const poolsLength = await this.factoryContract.contract.allPairsLength()
+      const poolAddresses = await Promise.all(
+        Array.from({ length: poolsLength }).map((i, index) => {
+          return this.factoryContract.contract.allPairs(index)
         })
       )
-    ).reduce((acc, cur) => {
-      acc[`${cur.token0.address}-${cur.token1.address}`] = cur
-      return acc
-    }, {})
-    this.pairs = (
-      await Promise.all(
-        pairs.map(async (pair) => {
-          await when(() => pair.token.isInit)
-          return pair
+      const pairs = poolAddresses.map((poolAddress) => {
+        const pairContract = new PairContract({
+          address: poolAddress,
         })
-      )
-    ).filter((pair) => pair.token.balance.gt(0))
+        return pairContract
+      })
+      this.pairsByToken = (
+        await Promise.all(
+          this.pairs.map(async (pair) => {
+            await when(() => pair.isInit)
+            return pair
+          })
+        )
+      ).reduce((acc, cur) => {
+        acc[`${cur.token0.address}-${cur.token1.address}`] = cur
+        return acc
+      }, {})
+      this.pairs = (
+        await Promise.all(
+          pairs.map(async (pair) => {
+            await when(() => pair.token.isInit)
+            return pair
+          })
+        )
+      ).filter((pair) => pair.token.balance.gt(0))
+
+    } catch (error) {
+      console.error(error,'this.liquidityLoading')
+    }
     this.liquidityLoading = false
   }
 
