@@ -97,7 +97,9 @@ class Liquidity {
     try {
       estimatedGas =
         await this.routerV2Contract.contract.estimateGas.addLiquidity(...args)
-    } catch (error) {}
+    } catch (error) {
+      console.error(error, 'addLiquidity-estimatedGas')
+    }
     if (estimatedGas) {
       args.push({
         gasLimit: estimatedGas.add(additionalGas),

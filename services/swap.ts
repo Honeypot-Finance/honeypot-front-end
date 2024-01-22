@@ -82,27 +82,29 @@ class Swap {
   }
 
   async swapExactTokensForTokens() {
-    await this.toToken.approve(
-      this.toAmountDecimals.toString(),
+    await this.fromToken.approve(
+      this.fromAmountDecimals.toString(),
       this.routerV2Contract.address
     )
     const deadline = Math.floor(Date.now() / 1000) + 60 * 20 // 20 mins time
     const path = [swap.fromToken.address, swap.toToken.address]
     const args: any [] = [
-      swap.toAmountDecimals.toString(),
-      new BigNumber(swap.fromAmountDecimals)
-        .minus(new BigNumber(swap.fromAmountDecimals).multipliedBy(0.015))
+      swap.fromAmountDecimals.toString(),
+      new BigNumber(swap.toAmountDecimals)
+        .minus(new BigNumber(swap.toAmountDecimals).multipliedBy(0.015))
         .toString(),
       path,
       wallet.account,
       deadline,
     ]
-    const additionalGas = ethers.utils.parseUnits('20000', 'wei')
+    const additionalGas = ethers.utils.parseUnits('5000', 'wei')
     let estimatedGas
     try {
       estimatedGas =
         await this.routerV2Contract.contract.estimateGas.swapExactTokensForTokens(...args)
-    } catch (error) {}
+    } catch (error) {
+      console.error(error, 'swapExactTokensForTokens-estimatedGas')
+    }
     if (estimatedGas) {
       args.push({
         gasLimit: estimatedGas.add(additionalGas),

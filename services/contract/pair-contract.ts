@@ -170,7 +170,9 @@ export class PairContract implements BaseContract {
       try {
         estimatedGas =
           await this.routerV2Contract.contract.estimateGas.removeLiquidity(...args)
-      } catch (error) {}
+      } catch (error) {
+        console.error(error, 'removeLiquidity-estimatedGas')
+      }
       if (estimatedGas) {
         args.push({
           gasLimit: estimatedGas.add(additionalGas),
