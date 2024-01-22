@@ -10,6 +10,7 @@ import BigNumber from 'bignumber.js'
 import { Wallet, wallet } from './wallet'
 import { makeAutoObservable } from '~/lib/observer'
 import { liquidity } from './liquidity'
+import { reaction } from '~/lib/event'
 
 class Swap {
   fromToken: Token = wallet.currentNetwork.tokens[0]
@@ -17,6 +18,8 @@ class Swap {
 
   fromAmount: string = ''
   toAmount: string = ''
+
+  currentPair: PairContract = null
 
   get fromAmountDecimals() {
     return this.fromToken
@@ -54,14 +57,6 @@ class Swap {
     )
   }
 
-  get currentPair() {
-    if (!this.fromToken || !this.toToken) {
-      return null
-    }
-    return liquidity.pairsByToken[
-      `${this.fromToken.address}-${this.toToken.address}`
-    ]
-  }
 
   get factoryContract() {
     return wallet.currentNetwork.contracts.factory
@@ -72,6 +67,30 @@ class Swap {
   }
 
   constructor() {
+    reaction(() => this.fromToken,() => {
+      if (!this.fromToken || !this.toToken) {
+        return null
+      }
+      this.fromAmount = ''
+      this.currentPair = liquidity.pairsByToken[
+        `${this.fromToken.address}-${this.toToken.address}`
+      ]
+    })
+    reaction(() => this.toToken, () => {
+      if (!this.fromToken || !this.toToken) {
+        return null
+      }
+      this.toAmount = ''
+      this.currentPair = liquidity.pairsByToken[
+        `${this.fromToken.address}-${this.toToken.address}`
+      ]
+    })
+    reaction(() => this.fromAmount, () => {
+      if (this.currentPair) {
+        this.toAmount = this.currentPair.getToAmount(this.fromAmount)
+      }
+
+    })
     makeAutoObservable(this)
   }
 

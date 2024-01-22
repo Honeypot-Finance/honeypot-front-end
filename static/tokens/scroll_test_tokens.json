@@ -1,6 +1,5 @@
 [
   {
-      "chainId": 534351,
       "name": "Binance USD",
       "symbol": "BUSD",
       "decimals": 18,
@@ -9,7 +8,6 @@
       "balance": 0
   },
   {
-      "chainId": 534351,
       "name": "Tether USD",
       "symbol": "USDT",
       "decimals": 6,
@@ -18,7 +16,6 @@
       "balance": 0
   },
   {
-      "chainId": 534351,
       "name": "Aave",
       "symbol": "Aave",
       "decimals": 18,
@@ -27,7 +24,6 @@
       "balance": 0
   },
   {
-      "chainId": 534351,
       "name": "CRV",
       "symbol": "CRV",
       "decimals": 18,

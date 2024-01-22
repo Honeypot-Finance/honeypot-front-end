@@ -213,7 +213,7 @@
         <!-- remove tab -->
         <v-sheet v-else id="container-remove" class="divcol fill_w" color="transparent" style="gap: 20px">
           <template v-if="!$liquidity.currentRemovePair">
-            <v-card :loading="$liquidity.liquidityLoading" v-for="(item, i) in $liquidity.myPairs" :key="i" class="card space" style="--b: 3px solid #292724; --br: 20px; --p: 20px; --h: 85px">
+            <v-card :loading="$liquidity.liquidityLoading" v-for="(item, i) in $liquidity.pairs" :key="i" class="card space" style="--b: 3px solid #292724; --br: 20px; --p: 20px; --h: 85px">
               <div class="center font2" style="gap: 10px">
                 <!-- <v-sheet class="dual-tokens" color="transparent">
                   <img :src="require(`~/assets/sources/tokens/${item.tokenA}.svg`)" :alt="`${item.tokenA} token`" class="aspect">

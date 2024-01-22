@@ -4,7 +4,7 @@
     <ModalsTokens ref="fromTokens" @select="onFromSelect" :token="$swap.fromToken" :oppositeToken="$swap.toToken" @switch="$swap.switchTokens()" ></ModalsTokens>
     <ModalsTokens ref="toTokens" @select="(token) => {
       $swap.toToken = token
-    }" :token="$swap.toToken" @switch="$swap.switchTokens()"  :oppositeToken="$swap.fromToken"></ModalsTokens>
+    }" :token="$swap.toToken" @switch="$swap.switchTokens()"  :oppositeToken="$swap.fromToken" ></ModalsTokens>
 
     <section id="swap-header" class="divcol center">
       <h1>Swap</h1>
@@ -17,9 +17,9 @@
         <ChartsSwapChart ref="chart" :height="heightChart" @model="$refs.modal.modalChart = true"></ChartsSwapChart>
       </v-card>
 
-
+      <section>
       <!-- middle -->
-      <v-form ref="form-swap" class="middle divcol jspace" style="gap: 12px" @submit.prevent="swap()">
+      <v-form v-if="!$liquidity.liquidityLoading" ref="form-swap" class="divcol jspace !w-[100%]" style="gap: 12px" @submit.prevent="swap()">
         <div class="fnowrap space" style="gap: inherit">
           <!-- card swap left -->
           <aside id="swapFrom" class="target_drag divcol" style="gap: inherit"
@@ -53,8 +53,8 @@
 
             <v-card class="card">
               <div class="divcol">
-                <v-text-field v-model="$swap.fromAmount" solo placeholder="0.00" type="number" class="custome"
-                  @input="calcPriceTo($event)" @keyup="$event => $event.key === 'Enter' ? swap() : ''">
+                <v-text-field :disabled="!$swap.currentPair" v-model="$swap.fromAmount" solo placeholder="0.00" type="number" class="custome"
+               @keyup="$event => $event.key === 'Enter' ? swap() : ''">
                   <!-- <template #counter>
                     <label class="font1" style="--fs: 21px">~${{ ($swap.fromAmount / 2).formatter(true) || 0 }} USD</label>
                   </template> -->
@@ -108,9 +108,17 @@
             </v-card>
           </aside>
         </div>
-
+        <div v-show="!$swap.currentPair" class="text-[#ca8a04]">
+          There are no pairs for this token, please create liquidity pool first.
+        </div>
         <v-btn class="btn stylish" :disabled="!($swap.fromAmount && $swap.toAmount)" @click="swap()">swap</v-btn>
       </v-form>
+      <v-skeleton-loader
+      v-else
+      class="w-[100%]"
+      type="card"
+    ></v-skeleton-loader>
+    </section>
 
 
       <!-- right -->
@@ -226,11 +234,9 @@ export default {
   methods: {
     halfAmount () {
       this.$swap.fromAmount = this.$swap.fromToken.balance.div(2).toFixed(2)
-      this.calcPriceTo()
     },
     maxAmount () {
       this.$swap.fromAmount = this.$swap.fromToken.balance.toFixed(2)
-      this.calcPriceTo()
     },
     onFromSelect(token) {
       this.$swap.fromToken = token
@@ -271,11 +277,7 @@ export default {
       }
     },
     calcPriceTo(event) {
-      if (!this.$swap.currentPair) {
-         this.$alert('cancel', 'No liquidity found for this pair')
-         return
-      }
-      this.$swap.toAmount = this.$swap.currentPair.getToAmount(this.$swap.fromAmount)
+
     },
     swap() {
       if (!(this.$swap.fromAmount && this.$swap.toAmount)) return;

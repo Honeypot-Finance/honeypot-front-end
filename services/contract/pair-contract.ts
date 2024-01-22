@@ -119,6 +119,8 @@ export class PairContract implements BaseContract {
     await when(() => this.token.isInit)
     this.token0LpBalance = !new BigNumber(this.totalSupply || 0).eq(0) ? new BigNumber(this.reserves.reserve0.toString()).multipliedBy(this.token.balance).div(this.totalSupply) : new BigNumber(0)
     this.token1LpBalance =  !new BigNumber(this.totalSupply || 0).eq(0) ? new BigNumber(this.reserves.reserve1.toString()).multipliedBy(this.token.balance).div(this.totalSupply) : new BigNumber(0)
+
+    console.log('this.liquidity', this.token0LpBalance.toFixed(2), this.token1LpBalance.toFixed(2))
     this.isInit = true
   }
   async getPricing() {

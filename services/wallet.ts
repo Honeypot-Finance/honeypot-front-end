@@ -1,6 +1,6 @@
 import { ethers } from 'ethers'
-import Vue from 'vue';
-import { Network, networks, test } from './chain'
+import Vue from 'vue'
+import { Network, networks } from './chain'
 import { makeAutoObservable } from '~/lib/observer'
 
 export class Wallet {
@@ -10,6 +10,7 @@ export class Wallet {
   ethereum: any = null
   currentChainId: string = ''
   networks = networks || []
+  currentNetwork: Network
 
   get readProvider() {
     return new ethers.providers.JsonRpcProvider(
@@ -17,27 +18,26 @@ export class Wallet {
     )
   }
 
+  get networksMap() {
+    return this.networks.reduce((acc, network) => {
+      acc[network.chainId] = network
+      return acc
+    }, {})
+  }
+
   get provider() {
     return new ethers.providers.Web3Provider(this.ethereum)
   }
 
-  get networksMap() {
-    const map = {}
-    this.networks.forEach((network) => {
-      map[network.chainId] = network
-    })
-    return map as Record<string, Network>
-  }
-
-  get currentNetwork() {
-    return this.networksMap[this.currentChainId] || ({} as Network)
-  }
+  // get currentNetwork() {
+  //   return this.networksMap[this.currentChainId] || ({} as Network)
+  // }
 
   get signer() {
     return this.provider.getSigner()
   }
 
-  constructor({ account, ...args }: Partial<Wallet>) {
+  constructor({ account, currentChainId, ...args }: Partial<Wallet>) {
     //@ts-ignore
     this.ethereum = window.ethereum
     this.ethereum.on('chainChanged', this.handleChainChanged)
@@ -46,13 +46,18 @@ export class Wallet {
     if (account) {
       this.setAccount(account)
     }
+    if (currentChainId) {
+      this.setCurrentNetwork(currentChainId)
+    }
     makeAutoObservable(this)
   }
   //  signer:
 
   setCurrentNetwork(currentChainId: string) {
     this.currentChainId = currentChainId
-    // this.currentNetwork = this.networksMap[this.currentChainId] || {} as Network
+    this.currentNetwork =
+      this.networksMap[this.currentChainId] || ({} as Network)
+    console.log('currentNetwork', this.currentNetwork)
   }
 
   setAccount(account: string) {
@@ -144,4 +149,3 @@ export const wallet = new Wallet({
 })
 wallet.connect()
 Vue.prototype.$wallet = wallet
-

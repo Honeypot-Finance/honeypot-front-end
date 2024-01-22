@@ -175,9 +175,9 @@ export default {
   computed: {
     filterDataPools() {
       if (!this.filters.search) {
-        return this.$liquidity.myPairs
+        return this.$liquidity.pairs
       }
-      return this.$liquidity.myPairs.filter(data => {
+      return this.$liquidity.pairs.filter(data => {
         return data.poolName.toLowerCase().includes(this.filters.search.toLowerCase())
       })
     },

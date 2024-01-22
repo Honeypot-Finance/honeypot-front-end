@@ -23,13 +23,13 @@ class Pair {
 
 class Liquidity {
   pairs: PairContract[] = []
-  myPairs: PairContract[] = []
   pairsByToken: Record<string, PairContract> = {}
   token0: Token = wallet.currentNetwork.tokens[0]
   token1: Token = wallet.currentNetwork.tokens[1]
 
   token0Amount: string = ''
   token1Amount: string = ''
+
 
   liquidityLoading = false
 
@@ -117,7 +117,7 @@ class Liquidity {
         return this.factoryContract.contract.allPairs(index)
       })
     )
-    this.pairs = poolAddresses.map((poolAddress) => {
+    const pairs = poolAddresses.map((poolAddress) => {
       const pairContract = new PairContract({
         address: poolAddress,
       })
@@ -134,9 +134,9 @@ class Liquidity {
       acc[`${cur.token0.address}-${cur.token1.address}`] = cur
       return acc
     }, {})
-    this.myPairs = (
+    this.pairs = (
       await Promise.all(
-        this.pairs.map(async (pair) => {
+        pairs.map(async (pair) => {
           await when(() => pair.token.isInit)
           return pair
         })
