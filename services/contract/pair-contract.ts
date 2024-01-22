@@ -150,40 +150,13 @@ export class PairContract implements BaseContract {
     }
   }
 
-  async addLiquidity(token0Amount, token1Amount) {
-    await when(() => this.token0.isInit && this.token1.isInit)
-    const token0AmountWithDec = new BigNumber(token0Amount).multipliedBy(new BigNumber(10).pow(this.token0.decimals)).toFixed()
-    const token1AmountWithDec = new BigNumber(token1Amount).multipliedBy(new BigNumber(10).pow(this.token1.decimals)).toFixed()
-    await Promise.all([
-      this.token0.approve(token0AmountWithDec, this.routerV2Contract.address),
-      this.token1.approve(token1AmountWithDec, this.routerV2Contract.address)
-    ])
-    const deadline = Math.floor(Date.now() / 1000) + 60 * 20; // 20 mins time
-    const args = [this.token0.address,
-      this.token1.address,
-      token0AmountWithDec,
-      token1AmountWithDec,
-      0,
-      0,
-      wallet.account,
-      deadline]
-    const additionalGas = ethers.utils.parseUnits('10000', 'wei')
-    const estimatedGas = await this.routerV2Contract.contract.estimateGas.addLiquidity(...args)
-    const res =  await this.routerV2Contract.contract.addLiquidity(
-      ...args,
-      {
-        gasLimit: estimatedGas.add(additionalGas),
-      }
-    )
-    await res.wait()
-  }
   async removeLiquidity (percent) {
     await when(() => this.token.isInit)
     const liquidity = this.token.balance.multipliedBy(percent).div(100).multipliedBy(new BigNumber(10).pow(this.token.decimals))
     if(liquidity.gt(0)){
       await this.token.approve(liquidity.toFixed(), this.routerV2Contract.address)
       const deadline = Math.floor(Date.now() / 1000) + 60 * 20; // 20 mins time
-      const args = [
+      const args: any[] = [
         this.token0.address,
         this.token1.address,
         liquidity.toFixed(),
@@ -191,13 +164,20 @@ export class PairContract implements BaseContract {
         0,
         wallet.account,
         deadline]
-      const additionalGas = ethers.utils.parseUnits('10000', 'wei')
-      const estimatedGas = await this.routerV2Contract.contract.estimateGas.removeLiquidity(...args)
-      const res =  await this.routerV2Contract.contract.removeLiquidity(
-        ...args,
-        {
+      const additionalGas = ethers.utils.parseUnits('5000', 'wei')
+      // const estimatedGas = await this.routerV2Contract.contract.estimateGas.removeLiquidity(...args)
+      let estimatedGas
+      try {
+        estimatedGas =
+          await this.routerV2Contract.contract.estimateGas.removeLiquidity(...args)
+      } catch (error) {}
+      if (estimatedGas) {
+        args.push({
           gasLimit: estimatedGas.add(additionalGas),
-        }
+        })
+      }
+      const res =  await this.routerV2Contract.contract.removeLiquidity(
+        ...args
       )
       await res.wait()
     }

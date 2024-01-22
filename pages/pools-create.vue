@@ -346,12 +346,12 @@ export default {
   },
   methods: {
     async addLiquidity() {
-      if (!this.$liquidity.currentPair) {
-        this.$alert("cancel", "There are no pairs for this token")
+      if (!this.$liquidity.token0 || !this.$liquidity.token1 || !this.$liquidity.token0Amount || !this.$liquidity.token1Amount) {
+        this.$alert("cancel", "Please fill all fields")
         return
       }
       this.addLiquidityLoading = true
-      await this.$liquidity.currentPair.addLiquidity(this.$liquidity.token0Amount, this.$liquidity.token1Amount)
+      await this.$liquidity.addLiquidity(this.$liquidity.token0, this.$liquidity.token1, this.$liquidity.token0Amount, this.$liquidity.token1Amount)
       this.addLiquidityLoading = false
       this.$alert("success", "Liquidity added successfuly")
       await this.$liquidity.getPools()

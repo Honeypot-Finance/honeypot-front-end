@@ -88,7 +88,7 @@ class Swap {
     )
     const deadline = Math.floor(Date.now() / 1000) + 60 * 20 // 20 mins time
     const path = [swap.fromToken.address, swap.toToken.address]
-    const args = [
+    const args: any [] = [
       swap.toAmountDecimals.toString(),
       new BigNumber(swap.fromAmountDecimals)
         .minus(new BigNumber(swap.fromAmountDecimals).multipliedBy(0.015))
@@ -98,16 +98,18 @@ class Swap {
       deadline,
     ]
     const additionalGas = ethers.utils.parseUnits('20000', 'wei')
-    const estimatedGas =
-      await this.routerV2Contract.contract.estimateGas.swapExactTokensForTokens(
-        ...args
-      )
-      console.log('estimatedGas', estimatedGas.toString())
-    const res = await this.routerV2Contract.contract.swapExactTokensForTokens(
-      ...args,
-      {
+    let estimatedGas
+    try {
+      estimatedGas =
+        await this.routerV2Contract.contract.estimateGas.swapExactTokensForTokens(...args)
+    } catch (error) {}
+    if (estimatedGas) {
+      args.push({
         gasLimit: estimatedGas.add(additionalGas),
-      }
+      })
+    }
+    const res = await this.routerV2Contract.contract.swapExactTokensForTokens(
+      ...args
     )
     await res.wait()
   }

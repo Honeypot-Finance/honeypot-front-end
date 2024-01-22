@@ -1,16 +1,15 @@
-
 import IUniswapV2Pair from '@uniswap/v2-core/build/IUniswapV2Pair.json'
 // import scrollTokens from '~/static/tokens/scroll_tokens.json'
 // import scrollSepoliaTokens from '~/static/tokens/scroll_alpha_tokens.json'
-import { wallet } from "./wallet";
-import { Token } from "./contract/token";
-import Vue from "vue";
-import { BaseContract } from "./contract";
-import { ethers } from "ethers";
-import { PairContract } from "./contract/pair-contract";
-import BigNumber from "bignumber.js";
-import { makeAutoObservable } from '~/lib/observer';
-import { when } from '~/lib/event';
+import { wallet } from './wallet'
+import { Token } from './contract/token'
+import Vue from 'vue'
+import { BaseContract } from './contract'
+import { ethers } from 'ethers'
+import { PairContract } from './contract/pair-contract'
+import BigNumber from 'bignumber.js'
+import { makeAutoObservable } from '~/lib/observer'
+import { when } from '~/lib/event'
 
 const tokensConfig = {
   // [mainNetwork.chainId]: scrollTokens,
@@ -18,84 +17,131 @@ const tokensConfig = {
 }
 
 class Pair {
-   address: string
-   contract: BaseContract
+  address: string
+  contract: BaseContract
 }
 
 class Liquidity {
-   pairs: PairContract[] = []
-   myPairs: PairContract[] = []
-   pairsByToken: Record<string, PairContract> = {}
-   token0: Token = wallet.currentNetwork.tokens[0]
-   token1: Token = wallet.currentNetwork.tokens[1]
+  pairs: PairContract[] = []
+  myPairs: PairContract[] = []
+  pairsByToken: Record<string, PairContract> = {}
+  token0: Token = wallet.currentNetwork.tokens[0]
+  token1: Token = wallet.currentNetwork.tokens[1]
 
-   token0Amount: string = ''
-   token1Amount: string = ''
+  token0Amount: string = ''
+  token1Amount: string = ''
 
-   liquidityLoading = false
+  liquidityLoading = false
 
-   currentRemovePair: PairContract | null = null
+  currentRemovePair: PairContract | null = null
 
-   get tokens () {
-    return tokensConfig[wallet.currentChainId].map(t => new Token(t))
-   }
+  get tokens() {
+    return tokensConfig[wallet.currentChainId].map((t) => new Token(t))
+  }
 
-   get routerV2Contract () {
+  get routerV2Contract() {
     return wallet.currentNetwork.contracts.routerV2
-   }
+  }
 
-   get factoryContract () {
+  get factoryContract() {
     return wallet.currentNetwork.contracts.factory
-   }
+  }
 
-   get currentPair () {
+  get currentPair() {
     if (!this.token0 || !this.token1) {
       return null
     }
     return this.pairsByToken[`${this.token0.address}-${this.token1.address}`]
-   }
+  }
 
-
-
-   constructor() {
+  constructor() {
     makeAutoObservable(this)
-   }
+  }
 
-   switchTokens() {
+  switchTokens() {
     const token0 = this.token0
     this.token0 = this.token1
     this.token1 = token0
   }
 
+  async addLiquidity(
+    token0: Token,
+    token1: Token,
+    token0Amount: string,
+    token1Amount: string
+  ) {
+    await when(() => token0.isInit && token1.isInit)
+    const token0AmountWithDec = new BigNumber(token0Amount)
+      .multipliedBy(new BigNumber(10).pow(token0.decimals))
+      .toFixed()
+    const token1AmountWithDec = new BigNumber(token1Amount)
+      .multipliedBy(new BigNumber(10).pow(token1.decimals))
+      .toFixed()
+    await Promise.all([
+      token0.approve(token0AmountWithDec, this.routerV2Contract.address),
+      token1.approve(token1AmountWithDec, this.routerV2Contract.address),
+    ])
+    const deadline = Math.floor(Date.now() / 1000) + 60 * 20 // 20 mins time
+    const args: any [] = [
+      token0.address,
+      token1.address,
+      token0AmountWithDec,
+      token1AmountWithDec,
+      0,
+      0,
+      wallet.account,
+      deadline,
+    ]
+    const additionalGas = ethers.utils.parseUnits('10000', 'wei')
+    let estimatedGas
+    try {
+      estimatedGas =
+        await this.routerV2Contract.contract.estimateGas.addLiquidity(...args)
+    } catch (error) {}
+    if (estimatedGas) {
+      args.push({
+        gasLimit: estimatedGas.add(additionalGas),
+      })
+    }
+    const res = await this.routerV2Contract.contract.addLiquidity(...args)
+    await res.wait()
+  }
 
-   async getPools() {
+  async getPools() {
     this.liquidityLoading = true
     const poolsLength = await this.factoryContract.contract.allPairsLength()
-    const poolAddresses = await Promise.all(Array.from({ length: poolsLength }).map((i,index) => {
-      return this.factoryContract.contract.allPairs(index)
-    }))
+    const poolAddresses = await Promise.all(
+      Array.from({ length: poolsLength }).map((i, index) => {
+        return this.factoryContract.contract.allPairs(index)
+      })
+    )
     this.pairs = poolAddresses.map((poolAddress) => {
       const pairContract = new PairContract({
         address: poolAddress,
       })
       return pairContract
     })
-    this.pairsByToken = (await Promise.all(this.pairs.map(async (pair) => {
-      await when(() => pair.isInit)
-      return pair
-   }))).reduce((acc,cur) => {
+    this.pairsByToken = (
+      await Promise.all(
+        this.pairs.map(async (pair) => {
+          await when(() => pair.isInit)
+          return pair
+        })
+      )
+    ).reduce((acc, cur) => {
       acc[`${cur.token0.address}-${cur.token1.address}`] = cur
       return acc
-   }, {})
-    this.myPairs = (await Promise.all(this.pairs.map(async (pair) => {
-      await when(() => pair.token.isInit)
-      return pair
-   }))).filter((pair) => pair.token.balance.gt(0))
-   this.liquidityLoading = false
+    }, {})
+    this.myPairs = (
+      await Promise.all(
+        this.pairs.map(async (pair) => {
+          await when(() => pair.token.isInit)
+          return pair
+        })
+      )
+    ).filter((pair) => pair.token.balance.gt(0))
+    this.liquidityLoading = false
   }
-
-
-
 
   // async getPairs () {
   //   const pair = {}
@@ -122,9 +168,7 @@ class Liquidity {
   //   }
   //   return pair
   //  }
-
 }
-
 
 export const liquidity = new Liquidity()
 Vue.prototype.$liquidity = liquidity
