@@ -56,7 +56,7 @@ export class PairContract implements BaseContract {
     })
     this.init()
     when(
-      () => this.token0?.isInit && this.token1?.isInit && this.init,
+      () => this.token0?.isInit && this.token1?.isInit && this.isInit,
       () => {
 
         this.liquidity = `${this.token0LpBalance.toFixed(2)} ${
