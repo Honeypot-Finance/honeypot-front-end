@@ -76,7 +76,7 @@ export default {
         //
       } catch (error) {
         console.error(error)
-        this.$alert("cancel", "Wait at least 24 hours to claim again " + item.name + " faucet", { persistent: true })
+        this.$alert("cancel", error.message, { persistent: true })
       }
       item.faucetLoading = false
     }
