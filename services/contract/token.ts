@@ -56,7 +56,7 @@ export class Token implements BaseContract {
   }
 
   async faucet() {
-    const additionalGas = ethers.utils.parseUnits('5000', 'wei')
+    const additionalGas = ethers.utils.parseUnits('12000', 'wei')
     const args = []
     let estimatedGas
     try {
