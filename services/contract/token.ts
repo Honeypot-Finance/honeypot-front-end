@@ -41,6 +41,9 @@ export class Token implements BaseContract {
     reaction(() => wallet.account, () => {
       this.getBalance()
     })
+    reaction(() => wallet.currentChainId, () => {
+      this.getBalance()
+    })
     makeAutoObservable(this)
   }
 

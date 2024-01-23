@@ -22,9 +22,7 @@ export class Multicall {
   }
 
   async tryAll(calls: Call[]) {
-    return pRetry(() => this.provider.tryAll(calls), {
-      retries:2
-    })
+    return this.provider.tryAll(calls)
   }
 
   async load(key: string, call: any) {
@@ -51,7 +49,7 @@ export class Multicall {
         tasks.forEach((t, index) => {
           t.resolve(data[index])
         })
-      }, 200)
+      },300)
     }
     this.lock = true
     return res

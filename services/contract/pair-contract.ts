@@ -90,7 +90,7 @@ export class PairContract implements BaseContract {
       `${this.address}-getTotalSupply`,
       this.readContract.totalSupply()
     )
-    this.totalSupply = new BigNumber(totalSupply.toString() || 0)
+    this.totalSupply = new BigNumber(totalSupply?.toString() || 0)
   }
 
   async getToken0() {
