@@ -56,8 +56,23 @@ export class Token implements BaseContract {
   }
 
   async faucet() {
-    const res = await this.faucetContract.faucet()
-    return res.await()
+    const additionalGas = ethers.utils.parseUnits('5000', 'wei')
+    const args = []
+    let estimatedGas
+    try {
+      estimatedGas =
+        await this.faucetContract.estimateGas.faucet()
+    } catch (error) {
+      console.error(error, 'faucet-estimatedGas')
+    }
+    if (estimatedGas) {
+      args.push({
+        gasLimit: estimatedGas.add(additionalGas),
+      })
+    }
+    const res = await this.faucetContract.faucet(...args)
+    await res.wait()
+    await this.getBalance()
   }
 
   async getBalance() {
@@ -66,7 +81,7 @@ export class Token implements BaseContract {
       `${this.address}-${wallet.account}-getBalance`,
       this.readContract.balanceOf(wallet.account)
     )
-    await when(() => this.decimals)
+    await when(() => this.decimals || this.decimals === 0)
     this.balance = balance
       ? new BigNumber(balance.toString()).div(
           new BigNumber(10).pow(this.decimals)
