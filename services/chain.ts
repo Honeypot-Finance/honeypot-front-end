@@ -72,31 +72,31 @@ export const BerachainTestNetwork =  new Network({
   tokens: berachainTestTokens.map((t: any) => new Token(t))
 })
 
-export const ScrollTestNetwork =  new Network({
-  chainId: '0x8274f',
-  rpcUrls: ['https://scroll-sepolia.blockpi.network/v1/rpc/public'],
-  chainName: 'Scroll Sepolia Testnet',
-  blockExplorerUrls:['https://sepolia-blockscout.scroll.io'],
-  nativeCurrency: {
-    symbol:'ETH',
-    decimals: 18
-  },
-  label: 'Scroll',
-  contracts: {
-    routerV2: new RouterV2Contract({
-      address: '0xf18c4ed3250f4A14279F5f79eD00b5A1Cd0391B0',
-    }),
-    factory: new FactoryContract({
-      address: '0x756Afd4cA8cE2ef38bD16b8BBB9e39e5e72D1c8c'
-    }),
-  },
-  tokens: scrollTestTokens.map((t: any) => new Token(t))
-})
+// export const ScrollTestNetwork =  new Network({
+//   chainId: '0x8274f',
+//   rpcUrls: ['https://scroll-sepolia.blockpi.network/v1/rpc/public'],
+//   chainName: 'Scroll Sepolia Testnet',
+//   blockExplorerUrls:['https://sepolia-blockscout.scroll.io'],
+//   nativeCurrency: {
+//     symbol:'ETH',
+//     decimals: 18
+//   },
+//   label: 'Scroll',
+//   contracts: {
+//     routerV2: new RouterV2Contract({
+//       address: '0xf18c4ed3250f4A14279F5f79eD00b5A1Cd0391B0',
+//     }),
+//     factory: new FactoryContract({
+//       address: '0x756Afd4cA8cE2ef38bD16b8BBB9e39e5e72D1c8c'
+//     }),
+//   },
+//   tokens: scrollTestTokens.map((t: any) => new Token(t))
+// })
 
 
 export const networks = process.env.CHAIN_ENV === 'test' ? [
   PolygonTestNetwork,
   BerachainTestNetwork,
-  ScrollTestNetwork,
+  // ScrollTestNetwork,
 ] : []
 
