@@ -9,6 +9,7 @@ import { reaction, when } from '~/lib/event'
 import { wallet } from '../wallet'
 import { multicall } from './multicall'
 import IUniswapV2Pair from '@uniswap/v2-core/build/IUniswapV2Pair.json'
+import { exec } from '~/lib/contract'
 
 // const totalSupply = await pairContract.methods.totalSupply().call()
 // const LPTokenBalance = await this.balanceOf(pairAddress)
@@ -166,24 +167,7 @@ export class PairContract implements BaseContract {
         0,
         wallet.account,
         deadline]
-      const additionalGas = ethers.utils.parseUnits('5000', 'wei')
-      // const estimatedGas = await this.routerV2Contract.contract.estimateGas.removeLiquidity(...args)
-      let estimatedGas
-      try {
-        estimatedGas =
-          await this.routerV2Contract.contract.estimateGas.removeLiquidity(...args)
-      } catch (error) {
-        console.error(error, 'removeLiquidity-estimatedGas')
-      }
-      if (estimatedGas) {
-        args.push({
-          gasLimit: estimatedGas.add(additionalGas),
-        })
-      }
-      const res =  await this.routerV2Contract.contract.removeLiquidity(
-        ...args
-      )
-      await res.wait()
+      await exec(this.routerV2Contract.contract, 'removeLiquidity', args)
     }
   }
 }

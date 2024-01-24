@@ -10,7 +10,8 @@ import BigNumber from 'bignumber.js'
 import { Wallet, wallet } from './wallet'
 import { makeAutoObservable } from '~/lib/observer'
 import { liquidity } from './liquidity'
-import { reaction } from '~/lib/event'
+import { reaction, when } from '~/lib/event'
+import { exec } from '~/lib/contract'
 
 class Swap {
   fromToken: Token = wallet.currentNetwork.tokens[0]
@@ -72,7 +73,8 @@ class Swap {
         return null
       }
       this.fromAmount = ''
-      this.currentPair = liquidity.pairsByToken[
+      console.log('')
+      this.currentPair = liquidity.pairsByToken?.[
         `${this.fromToken.address}-${this.toToken.address}`
       ]
     })
@@ -81,6 +83,12 @@ class Swap {
         return null
       }
       this.toAmount = ''
+      this.currentPair = liquidity.pairsByToken?.[
+        `${this.fromToken.address}-${this.toToken.address}`
+      ]
+    })
+    when(() => liquidity?.pairsByToken && this.fromToken && this.toToken, () => {
+      // console.log('when', liquidity.pairsByToken)
       this.currentPair = liquidity.pairsByToken[
         `${this.fromToken.address}-${this.toToken.address}`
       ]
@@ -116,23 +124,7 @@ class Swap {
       wallet.account,
       deadline,
     ]
-    const additionalGas = ethers.utils.parseUnits('5000', 'wei')
-    let estimatedGas
-    try {
-      estimatedGas =
-        await this.routerV2Contract.contract.estimateGas.swapExactTokensForTokens(...args)
-    } catch (error) {
-      console.error(error, 'swapExactTokensForTokens-estimatedGas')
-    }
-    if (estimatedGas) {
-      args.push({
-        gasLimit: estimatedGas.add(additionalGas),
-      })
-    }
-    const res = await this.routerV2Contract.contract.swapExactTokensForTokens(
-      ...args
-    )
-    await res.wait()
+    await exec(this.routerV2Contract.contract, 'swapExactTokensForTokens', args)
   }
 
   // async getPairs () {

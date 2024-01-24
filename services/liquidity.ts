@@ -10,6 +10,7 @@ import { PairContract } from './contract/pair-contract'
 import BigNumber from 'bignumber.js'
 import { makeAutoObservable } from '~/lib/observer'
 import { when } from '~/lib/event'
+import { exec } from '~/lib/contract'
 
 const tokensConfig = {
   // [mainNetwork.chainId]: scrollTokens,
@@ -23,7 +24,7 @@ class Pair {
 
 class Liquidity {
   pairs: PairContract[] = []
-  pairsByToken: Record<string, PairContract> = {}
+  pairsByToken: Record<string, PairContract>
   token0: Token = wallet.currentNetwork.tokens[0]
   token1: Token = wallet.currentNetwork.tokens[1]
 
@@ -51,7 +52,7 @@ class Liquidity {
     if (!this.token0 || !this.token1) {
       return null
     }
-    return this.pairsByToken[`${this.token0.address}-${this.token1.address}`]
+    return this.pairsByToken?.[`${this.token0.address}-${this.token1.address}`]
   }
 
   constructor() {
@@ -92,21 +93,7 @@ class Liquidity {
       wallet.account,
       deadline,
     ]
-    const additionalGas = ethers.utils.parseUnits('10000', 'wei')
-    let estimatedGas
-    try {
-      estimatedGas =
-        await this.routerV2Contract.contract.estimateGas.addLiquidity(...args)
-    } catch (error) {
-      console.error(error, 'addLiquidity-estimatedGas')
-    }
-    if (estimatedGas) {
-      args.push({
-        gasLimit: estimatedGas.add(additionalGas),
-      })
-    }
-    const res = await this.routerV2Contract.contract.addLiquidity(...args)
-    await res.wait()
+    await exec(this.routerV2Contract.contract, 'addLiquidity', args)
   }
 
   async getPools() {
@@ -124,6 +111,14 @@ class Liquidity {
         })
         return pairContract
       })
+      this.pairs = (
+        await Promise.all(
+          pairs.map(async (pair) => {
+            await when(() => pair.token.isInit)
+            return pair
+          })
+        )
+      ).filter((pair) => pair.token.balance.gt(0))
       this.pairsByToken = (
         await Promise.all(
           this.pairs.map(async (pair) => {
@@ -135,14 +130,6 @@ class Liquidity {
         acc[`${cur.token0.address}-${cur.token1.address}`] = cur
         return acc
       }, {})
-      this.pairs = (
-        await Promise.all(
-          pairs.map(async (pair) => {
-            await when(() => pair.token.isInit)
-            return pair
-          })
-        )
-      ).filter((pair) => pair.token.balance.gt(0))
 
     } catch (error) {
       console.error(error,'this.liquidityLoading')

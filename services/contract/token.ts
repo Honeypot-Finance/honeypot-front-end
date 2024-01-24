@@ -8,6 +8,7 @@ import { makeAutoObservable } from '~/lib/observer'
 import { reaction, when } from '~/lib/event'
 import { multicall } from './multicall'
 import { wallet } from '../wallet'
+import { exec } from '~/lib/contract'
 
 export class Token implements BaseContract {
   address: string = ''
@@ -56,22 +57,8 @@ export class Token implements BaseContract {
   }
 
   async faucet() {
-    const additionalGas = ethers.utils.parseUnits('12000', 'wei')
     const args = []
-    let estimatedGas
-    try {
-      estimatedGas =
-        await this.faucetContract.estimateGas.faucet()
-    } catch (error) {
-      console.error(error, 'faucet-estimatedGas')
-    }
-    if (estimatedGas) {
-      args.push({
-        gasLimit: estimatedGas.add(additionalGas),
-      })
-    }
-    const res = await this.faucetContract.faucet(...args)
-    await res.wait()
+    await exec(this.faucetContract, 'faucet', args)
     await this.getBalance()
   }
 
