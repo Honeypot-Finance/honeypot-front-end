@@ -12,10 +12,10 @@ export const exec = async (contract: Contract, contractMethod: string, args: any
   }
   if (estimatedGas) {
     execArgs.push({
-      gasLimit: new BigNumber(estimatedGas.toString()).multipliedBy(1.2).toFixed(0),
+      gasLimit: new BigNumber(estimatedGas.toString()).multipliedBy(1.25).toFixed(0),
     })
   } else {
-    const manualGas = ethers.utils.parseUnits('20000', 'wei')
+    const manualGas = ethers.utils.parseUnits('36000', 'wei')
     execArgs.push({
       gasLimit: manualGas
     })
