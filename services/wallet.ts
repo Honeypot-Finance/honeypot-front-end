@@ -57,7 +57,6 @@ export class Wallet {
     this.currentChainId = currentChainId
     this.currentNetwork =
       this.networksMap[this.currentChainId] || ({} as Network)
-    console.log('currentNetwork', this.currentNetwork)
   }
 
   setAccount(account: string) {

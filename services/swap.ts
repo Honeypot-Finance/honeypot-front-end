@@ -88,7 +88,7 @@ class Swap {
       ]
     })
     when(() => liquidity?.pairsByToken && this.fromToken && this.toToken, () => {
-      // console.log('when', liquidity.pairsByToken)
+      console.log('when', liquidity.pairsByToken, `${this.fromToken.address}-${this.toToken.address}`)
       this.currentPair = liquidity.pairsByToken[
         `${this.fromToken.address}-${this.toToken.address}`
       ]

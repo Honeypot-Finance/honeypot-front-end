@@ -128,6 +128,7 @@ class Liquidity {
         )
       ).reduce((acc, cur) => {
         acc[`${cur.token0.address}-${cur.token1.address}`] = cur
+        acc[`${cur.token1.address}-${cur.token0.address}`] = cur
         return acc
       }, {})
 

@@ -33,11 +33,12 @@ export class Token implements BaseContract {
     return new ethers.Contract(this.address, this.abi, this.signer)
   }
 
-  constructor({ balance, ...args }: Partial<Token>) {
+  constructor({ balance, address, ...args }: Partial<Token>) {
     Object.assign(this, args)
     if (balance) {
       this.balance = new BigNumber(balance)
     }
+    this.address = address.toLowerCase()
     this.init()
     reaction(() => wallet.account, () => {
       this.getBalance()
@@ -53,7 +54,8 @@ export class Token implements BaseContract {
     if (new BigNumber(allowance.toString()).gte(new BigNumber(amount))) {
       return
     }
-    return this.contract.approve(spender, amount)
+    const args = [spender, amount]
+    await exec(this.contract, 'approve', args)
   }
 
   async faucet() {

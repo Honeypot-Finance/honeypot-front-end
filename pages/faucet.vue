@@ -51,7 +51,6 @@
 export default {
   name: "FaucetPage",
   data() {
-    console.log(this.$wallet.currentNetwork)
     return {
       tableHeaders: [
         { value: "name", text: "Asset", sortable: false },

@@ -243,7 +243,6 @@ export default {
     },
     styles() {
       // height chart calculator
-      console.log('this.$refs.target_swap_chart', this.$refs)
       const
         container = this.$refs.target_swap_chart.$el,
         header = container.querySelector(".charts-header"),
