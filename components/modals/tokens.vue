@@ -4,7 +4,7 @@
     <section class="modalTokens-header">
       <div class="wrapper-header">
         <h3 style="--fw: 700">Select a token</h3>
-        <v-btn icon style="top: -10px" @click="modalTokens = false">
+        <v-btn icon style="top: -10px" @click="modalTokensOpen = false">
           <v-icon>mdi-close</v-icon>
         </v-btn>
       </div>
@@ -24,7 +24,7 @@
             v-for="(item, i) in dataPopularTokens.slice(0, 8)" :key="i" class="tup" color="#292724" style="border-radius: 10px; min-width: 82px"
             :disabled="isDisable(item)" @click="selectToken(item)"
           >
-            <v-img :src="item.logoURI" class="aspect mr-2" style="--w: 20px">
+            <v-img :src="item.logoURI" class="aspect mr-2" :alt="item.name" style="--w: 20px">
               <template #placeholder>
                 <v-skeleton-loader type="avatar" />
               </template>

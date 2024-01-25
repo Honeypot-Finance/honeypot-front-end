@@ -98,11 +98,13 @@
                   <v-chip
                     close close-icon="mdi-chevron-down" class="btn2 center" @click="$refs.tokens0.openModalTokens()"
                     @click:close="$refs.tokens0.openModalTokens()">
-                    <img
-                      v-if="$liquidity.token0.logoURI" :src="$liquidity.token0.logoURI" :alt="`${$liquidity.token0.name} token`"
+                    <v-img
+                      :src="$liquidity.token0.logoURI" :alt="`${$liquidity.token0.name} token`"
                       class="aspect mr-2" style="--w: 20px; --of: cover"
-                    >
-                    <div v-else class="card aspect mr-2" style="--w: 20px; --br: 50%; --bg: #fff; --p: 0" />
+                    > <template #placeholder>
+                      <v-skeleton-loader type="avatar" />
+                    </template></v-img>
+                    <!-- <div v-else class="card aspect mr-2" style="--w: 20px; --br: 50%; --bg: #fff; --p: 0" /> -->
 
                     <span class="tup">{{$liquidity.token0.name}}</span>
                   </v-chip>
@@ -146,10 +148,13 @@
                   <v-chip
                     close close-icon="mdi-chevron-down" class="btn2 center" @click="$refs.tokens1.openModalTokens()"
                     @click:close="$refs.tokens1.openModalTokens()">
-                    <img
-                      v-if="$liquidity.token1.logoURI" :src="$liquidity.token1.logoURI" :alt="`${$liquidity.token1.name} token`"
+                    <v-img
+                     :src="$liquidity.token1.logoURI" :alt="`${$liquidity.token1.name} token`"
                       class="aspect mr-2" style="--w: 20px; --of: cover">
-                    <div v-else class="card aspect mr-2" style="--w: 20px; --br: 50%; --bg: #fff; --p: 0" />
+                      <template #placeholder>
+                      <v-skeleton-loader type="avatar" />
+                    </template></v-img>
+                    <!-- <div v-else class="card aspect mr-2" style="--w: 20px; --br: 50%; --bg: #fff; --p: 0" /> -->
 
                     <span class="tup">{{$liquidity.token1.name}}</span>
                   </v-chip>

@@ -24,7 +24,11 @@
       <template #[`item.name`]="{ item }">
         <div class="acenter font2" style="gap: 10px">
           <v-sheet class="dual-tokens" color="transparent" style="--h-sheet: 40px">
-            <img :src="item.logoURI" :alt="`${item.name} token`"
+            <v-img :src="item.logoURI">
+              <template #placeholder>
+                <v-skeleton-loader type="avatar" />
+              </template>
+            </v-img>
               class="aspect">
           </v-sheet>
 

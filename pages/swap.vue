@@ -29,10 +29,7 @@
               <div class="space">
                 <v-chip close close-icon="mdi-chevron-down" class="btn2" @click="$refs.fromTokens.openModalTokens($swap.fromToken)"
                   @click:close="$refs.fromTokens.openModalTokens($swap.fromToken)">
-                  <v-img class="aspect mr-2" style="--w: 20px">
-                    <template #default>
-                      <img :src="$swap.fromToken.logoURI" :alt="`${$swap.fromToken.name} token`" style="--w: 100%; --of: cover">
-                    </template>
+                  <v-img :src="$swap.fromToken.logoURI" :alt="`${$swap.fromToken.name} token`" style="--w: 20px; --of: cover" class="aspect mr-2">
                     <template #placeholder>
                       <v-skeleton-loader type="avatar" />
                     </template>
@@ -78,11 +75,7 @@
               <div class="space">
                 <v-chip close close-icon="mdi-chevron-down" class="tup btn2" @click="$refs.toTokens.openModalTokens($swap.toToken)"
                   @click:close="$refs.toTokens.openModalTokens($swap.toToken)">
-                  <v-img class="aspect mr-2" style="--w: 20px">
-                    <template #default>
-                      <img :src="$swap.toToken.logoURI" :alt="`${$swap.toToken.name} token`" style="--w: 100%; --of: cover">
-                    </template>
-
+                  <v-img :src="$swap.toToken.logoURI" :alt="`${$swap.toToken.name} token`" class="aspect mr-2" style="--w: 20px">
                     <template #placeholder>
                       <v-skeleton-loader type="avatar" />
                     </template>
