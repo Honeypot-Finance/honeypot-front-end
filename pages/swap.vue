@@ -50,7 +50,7 @@
 
             <v-card class="card">
               <div class="divcol">
-                <v-text-field :disabled="!$swap.currentPair" v-model="$swap.fromAmount" solo placeholder="0.00" type="number" class="custome"
+                <v-text-field :rules="[this.$rules.max($swap.fromToken.balance)]" :disabled="!$swap.currentPair" v-model="$swap.fromAmount" solo placeholder="0.00" type="number" class="custome"
                @keyup="$event => $event.key === 'Enter' ? swap() : ''">
                   <!-- <template #counter>
                     <label class="font1" style="--fs: 21px">~${{ ($swap.fromAmount / 2).formatter(true) || 0 }} USD</label>
@@ -272,6 +272,10 @@ export default {
 
     },
     swap() {
+      const validated = this.$refs['form-swap'].validate()
+      if (!validated) {
+         return
+      }
       if (!(this.$swap.fromAmount && this.$swap.toAmount)) return;
       const data = {
         tokenFrom: this.$swap.fromToken.name,

@@ -68,6 +68,11 @@ export default {
   methods: {
     async confirm() {
       try {
+        const validate = this.$swap.swapValidate()
+        console.log('validate', validate)
+        if (typeof validate === 'string') {
+           return this.$alert('cancel', validate)
+        }
         await this.$swap.swapExactTokensForTokens()
         this.$alert("success")
         this.$router.push(this.localePath('/swap'))

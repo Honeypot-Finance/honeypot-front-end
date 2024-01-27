@@ -91,6 +91,7 @@ const config: NuxtConfig = {
     '~/plugins/apexchart.js',
     '~/plugins/google-maps.js',
     '~/plugins/vue-debounce.js',
+    '~/plugins/utils.ts',
     '~/services/index.ts',
     // services
     // '~/services/near-api',

@@ -108,6 +108,13 @@ class Swap {
     this.toToken = fromToken
   }
 
+  swapValidate () {
+    if (this.currentPair.token1LpBalance.lt(this.toAmount)) {
+      return 'Insufficient liquidity'
+   }
+   return true
+  }
+
   async swapExactTokensForTokens() {
     await this.fromToken.approve(
       this.fromAmountDecimals.toString(),
@@ -125,6 +132,7 @@ class Swap {
       deadline,
     ]
     await exec(this.routerV2Contract.contract, 'swapExactTokensForTokens', args)
+    return true
   }
 
   // async getPairs () {

@@ -23,15 +23,13 @@
     <v-data-table :headers="tableHeaders"  :items="$wallet.currentNetwork.tokens" hide-default-footer mobile-breakpoint="-1">
       <template #[`item.name`]="{ item }">
         <div class="acenter font2" style="gap: 10px">
-          <v-sheet class="dual-tokens" color="transparent" style="--h-sheet: 40px">
-            <v-img :src="item.logoURI">
+          <v-sheet color="transparent" style="--h-sheet: 40px">
+            <v-img :src="item.logoURI" class="aspect" :alt="item.name" style="--w: 40px">
               <template #placeholder>
                 <v-skeleton-loader type="avatar" />
               </template>
             </v-img>
-              class="aspect">
           </v-sheet>
-
           <span class="bold tup">{{ item.name }}</span>
         </div>
       </template>
