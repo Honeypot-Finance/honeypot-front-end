@@ -6,12 +6,15 @@ import { Token } from './contract/token'
 import { RouterV2Contract } from './contract/routerv2-contract'
 import { FactoryContract } from './contract/factory-contract'
 import { makeAutoObservable } from '~/lib/observer'
+import BigNumber from 'bignumber.js'
+import { ethers } from 'ethers'
 
 export class Network {
   chainId!: string
   rpcUrls!: string[]
   chainName!: string
   blockExplorerUrls:string[]
+  balance: BigNumber = new BigNumber(0)
   nativeCurrency: {
     symbol: string
     decimals: number
@@ -22,9 +25,19 @@ export class Network {
     factory: FactoryContract
   }
   tokens: Token[] = []
+
+  get readProvider() {
+    return new ethers.providers.JsonRpcProvider(
+      this.rpcUrls?.[0]
+    )
+  }
   constructor(args: Partial<Network>) {
     Object.assign(this, args)
     makeAutoObservable(this)
+  }
+  async getBalance (account: string) {
+    const balance = await this.readProvider.getBalance(account)
+    this.balance = new BigNumber(balance.toString()).div(new BigNumber(10).pow(this.nativeCurrency.decimals))
   }
 }
 

@@ -2,6 +2,9 @@ import { ethers } from 'ethers'
 import Vue from 'vue'
 import { Network, networks } from './chain'
 import { makeAutoObservable } from '~/lib/observer'
+import { StorePlugin } from '~/lib/observer/storePlugin'
+import { reaction } from '~/lib/event'
+import BigNumber from 'bignumber.js'
 
 export class Wallet {
   account: string = ''
@@ -11,11 +14,10 @@ export class Wallet {
   currentChainId: string = ''
   networks = networks || []
   currentNetwork: Network
+  balance: BigNumber = new BigNumber(0)
 
   get readProvider() {
-    return new ethers.providers.JsonRpcProvider(
-      this.currentNetwork?.rpcUrls?.[0]
-    )
+     return this.currentNetwork?.readProvider
   }
 
   get networksMap() {
@@ -48,16 +50,32 @@ export class Wallet {
     }
     if (currentChainId) {
       this.setCurrentNetwork(currentChainId)
+      this.currentNetwork =
+      this.networksMap[this.currentChainId] || ({} as Network)
     }
-    makeAutoObservable(this)
+    reaction(() => this.currentChainId, () => {
+      if (this.currentChainId) {
+        this.currentNetwork =
+        this.networksMap[this.currentChainId] || ({} as Network)
+        if (this.account) {
+          this.currentNetwork.getBalance(this.account)
+        }
+      }
+
+    })
+    reaction(() => this.account, () => {
+      if (this.currentChainId && this.account) {
+        this.currentNetwork.getBalance(this.account)
+      }
+    })
+    makeAutoObservable(this, [new StorePlugin({ observerKeys: ['currentChainId'], namespace: 'wallet', target: this})])
   }
   //  signer:
 
   setCurrentNetwork(currentChainId: string) {
     this.currentChainId = currentChainId
-    this.currentNetwork =
-      this.networksMap[this.currentChainId] || ({} as Network)
   }
+
 
   setAccount(account: string) {
     this.account = account
