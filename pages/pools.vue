@@ -11,10 +11,10 @@
           <span>{{poolsLocked ? `$${poolsLocked.toLocaleString().split('.').join(',')}` : ''}}</span>
         </div>
 
-        <img
+        <!-- <img
           src="~/assets/sources/miscellaneous/locked-pools-test-img.jpg" alt="test image"
           style="--h: 123px; --ar: 1.75 / 1; border-radius: 0 !important"
-        >
+        > -->
       </v-card>
     </section>
 
@@ -168,9 +168,6 @@ export default {
     return {
       title,
     }
-  },
-  beforeCreate () {
-     this.$liquidity.getPools()
   },
   computed: {
     filterDataPools() {

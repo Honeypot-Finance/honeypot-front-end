@@ -50,14 +50,14 @@
 
             <v-card class="card">
               <div class="divcol">
-                <v-text-field :rules="[this.$rules.max($swap.fromToken.balance)]" :disabled="!$swap.currentPair" v-model="$swap.fromAmount" solo placeholder="0.00" type="number" class="custome"
+                <v-text-field :rules="[this.$rules.max($swap.fromToken.balance)]" :disabled="!$swap.currentPair" v-model="$swap.fromAmount"   hide-spin-buttons solo placeholder="0.00" type="number" class="custome"
                @keyup="$event => $event.key === 'Enter' ? swap() : ''">
                   <!-- <template #counter>
                     <label class="font1" style="--fs: 21px">~${{ ($swap.fromAmount / 2).formatter(true) || 0 }} USD</label>
                   </template> -->
                 </v-text-field>
               </div>
-              <label class="font1">Balance {{ $swap.fromToken.balance.toFixed(2) }}</label>
+              <label class="font1">Balance {{ $swap.fromToken.balance.toFormat(2) }}</label>
             </v-card>
           </aside>
 
@@ -90,14 +90,14 @@
 
             <v-card class="card">
               <div class="divcol">
-                <v-text-field v-model="$swap.toAmount" solo  placeholder="0.00" type="number" class="custome"
+                <v-text-field v-model="$swap.toAmount" solo  placeholder="0.00" type="number" class="custome"  hide-spin-buttons
                   disabled>
                   <!-- <template #counter>
                     <label class="font1" style="--fs: 21px">~${{ ($swap.toAmount / 2).formatter(true) || 0 }} USD</label>
                   </template> -->
                 </v-text-field>
               </div>
-              <label class="font1">Balance {{ $swap.toToken.balance.toFixed(2) }}</label>
+              <label class="font1">Balance {{ $swap.toToken.balance.toFormat(2) }}</label>
             </v-card>
           </aside>
         </div>
@@ -212,9 +212,6 @@ export default {
     dataTokens () {
       return this.$wallet.currentNetwork.tokens
     }
-  },
-  beforeCreate () {
-    this.$liquidity.getPools()
   },
   mounted() {
     this.styles()

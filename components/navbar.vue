@@ -82,18 +82,18 @@ export default {
   data() {
     return {
       dataNavbar: process.env.CHAIN_ENV === 'test' ? [
-        {
-          name: "portfolio",
-          to: "/portfolio"
-        },
+        // {
+        //   name: "portfolio",
+        //   to: "/portfolio"
+        // },
         {
           name: "swap",
           to: "/swap"
         },
-        {
-          name: "farm",
-          to: "/farm"
-        },
+        // {
+        //   name: "farm",
+        //   to: "/farm"
+        // },
         {
           name: "faucet",
           to: "/faucet"
@@ -102,31 +102,31 @@ export default {
           name: "pools",
           to: "/pools"
         },
-        {
-          name: "xhpot",
-          to: "/staking"
-        },
+        // {
+        //   name: "xhpot",
+        //   to: "/staking"
+        // },
       ] : [
-        {
-          name: "portfolio",
-          to: "/portfolio"
-        },
+        // {
+        //   name: "portfolio",
+        //   to: "/portfolio"
+        // },
         {
           name: "swap",
           to: "/swap"
         },
-        {
-          name: "farm",
-          to: "/farm"
-        },
+        // {
+        //   name: "farm",
+        //   to: "/farm"
+        // },
         {
           name: "pools",
           to: "/pools"
         },
-        {
-          name: "xhpot",
-          to: "/staking"
-        },
+        // {
+        //   name: "xhpot",
+        //   to: "/staking"
+        // },
       ],
     };
   },

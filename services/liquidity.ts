@@ -9,7 +9,7 @@ import { ethers } from 'ethers'
 import { PairContract } from './contract/pair-contract'
 import BigNumber from 'bignumber.js'
 import { makeAutoObservable } from '~/lib/observer'
-import { when } from '~/lib/event'
+import { reaction, when } from '~/lib/event'
 import { exec } from '~/lib/contract'
 
 const tokensConfig = {
@@ -56,6 +56,18 @@ class Liquidity {
   }
 
   constructor() {
+    reaction(() => wallet.currentNetwork, () => {
+      this.token0 = wallet.currentNetwork.tokens[0]
+      this.token1 = wallet.currentNetwork.tokens[1]
+      if (wallet.account) {
+        this.getPools()
+      }
+    })
+    reaction(() => wallet.account, () => {
+      if (wallet.currentChainId) {
+        this.getPools()
+      }
+    })
     makeAutoObservable(this)
   }
 

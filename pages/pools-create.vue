@@ -18,10 +18,10 @@
           btc
         </span>
 
-        <img
+        <!-- <img
           src="~/assets/sources/miscellaneous/locked-pools-test-img.jpg" alt="test image"
           style="--h: 123px; --ar: 1.75 / 1; border-radius: 0 !important"
-        >
+        > -->
       </v-card>
     </section>
 
@@ -41,10 +41,10 @@
           }}
         </p>
 
-        <img
+        <!-- <img
           src="~/assets/sources/miscellaneous/locked-pools-test-img.jpg" alt="test image"
           style="--h: 123px; --ar: 1.75 / 1; border-radius: 0 !important; max-width: 201px !important"
-        >
+        > -->
       </v-sheet>
 
       <v-card v-else id="container-chart" class="card divcol jcenter" style="--br: 20px">
@@ -122,6 +122,7 @@
                     solo
                     placeholder="0.00"
                     type="number"
+                    hide-spin-buttons
                     class="custome"
                     @keyup="$event => $event.key === 'Enter' ? addLiquiidty() : ''"
                   >
@@ -170,6 +171,7 @@
                   <v-text-field
                     v-model="$liquidity.token1Amount"
                     solo
+                    hide-spin-buttons
                     placeholder="0.00"
                     type="number"
                     class="custome"
@@ -345,9 +347,6 @@ export default {
     currentTab() {
       this.removeSelected = undefined
     }
-  },
-  beforeCreate () {
-     this.$liquidity.getPools()
   },
   methods: {
     async addLiquidity() {

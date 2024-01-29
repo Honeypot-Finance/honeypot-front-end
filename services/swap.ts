@@ -99,6 +99,10 @@ class Swap {
       }
 
     })
+    reaction(() => wallet.currentNetwork, () => {
+      this.fromToken = wallet.currentNetwork.tokens[0]
+      this.toToken = wallet.currentNetwork.tokens[1]
+    })
     makeAutoObservable(this)
   }
 
