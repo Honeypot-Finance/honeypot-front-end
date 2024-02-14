@@ -3,7 +3,7 @@ import Vue from 'vue'
 import { Network, networks } from './chain'
 import { makeAutoObservable } from '~/lib/observer'
 import { StorePlugin } from '~/lib/observer/storePlugin'
-import { reaction } from '~/lib/event'
+import { reaction, when } from '~/lib/event'
 import BigNumber from 'bignumber.js'
 
 export class Wallet {
@@ -42,8 +42,11 @@ export class Wallet {
   constructor({ account, currentChainId, ...args }: Partial<Wallet>) {
     //@ts-ignore
     this.ethereum = window.ethereum
-    this.ethereum.on('chainChanged', this.handleChainChanged)
-    this.ethereum.on('accountsChanged', this.handleAccountsChanged)
+    when(() => this.ethereum, () => {
+      this.ethereum.on('chainChanged', this.handleChainChanged)
+      this.ethereum.on('accountsChanged', this.handleAccountsChanged)
+    })
+
     Object.assign(this, args)
     if (account) {
       this.setAccount(account)
