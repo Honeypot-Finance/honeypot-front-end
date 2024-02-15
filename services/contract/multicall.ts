@@ -6,17 +6,25 @@ import { when } from '~/lib/event'
 import pRetry from 'p-retry'
 
 export class Multicall {
-  address = '0xcA11bde05977b3631167028862bE2a173976CA11'
+  get address() {
+    return wallet.currentNetwork.multicallAddress
+  }
   cache = new Map()
   lock = false
+  limit = 10
   tasks: {
     key: string
     call: any
     resolve: any
+    result?: any
     reject: any
   }[] = []
   get provider() {
     const provider = new Provider()
+    // @ts-ignore
+    provider.multicall3 = {
+      address: this.address,
+    }
     provider.init(wallet.readProvider)
     return provider
   }
@@ -26,6 +34,7 @@ export class Multicall {
   }
 
   async load(key: string, call: any) {
+    key = `${wallet?.currentChainId}-${key}`
     if (this.cache.has(key)) {
       return this.cache.get(key)
     }
@@ -40,16 +49,16 @@ export class Multicall {
     this.cache.set(key, res)
     if (!this.lock) {
       setTimeout(async () => {
-        this.cache.clear()
-        this.lock = false
         const tasks = this.tasks
         this.tasks = []
-
+        this.cache.clear()
+        this.lock = false
         const data = await this.tryAll(tasks.map((t) => t.call))
         tasks.forEach((t, index) => {
+          t.result = data[index]
           t.resolve(data[index])
         })
-      },300)
+      }, 1000)
     }
     this.lock = true
     return res

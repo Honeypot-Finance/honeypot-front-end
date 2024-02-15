@@ -4,10 +4,6 @@ module.exports = {
     "browser": true,
     "node": true
   },
-  // "parserOptions": {
-  //   "parser": "@babel/eslint-parser",
-  //   "requireConfigFile": false
-  // },
   "extends": [
     "@nuxtjs",
     "plugin:nuxt/recommended",
@@ -58,6 +54,8 @@ module.exports = {
     "eol-last": 0,
     "operator-linebreak": 0,
     "block-spacing": 0,
-    "import/order": 0
+    "import/order": 0,
+    "arrow-spacing": 0,
+    "dot-location": 0
   }
 }

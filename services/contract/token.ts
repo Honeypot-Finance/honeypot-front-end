@@ -40,9 +40,12 @@ export class Token implements BaseContract {
     }
     this.address = address.toLowerCase()
     this.init()
-    reaction(() => wallet.account, () => {
-      this.getBalance()
-    })
+    reaction(
+      () => wallet.account,
+      () => {
+        this.getBalance()
+      }
+    )
     // reaction(() => wallet.currentChainId, () => {
     //   this.getBalance()
     // })
@@ -79,20 +82,29 @@ export class Token implements BaseContract {
     return this.balance
   }
 
-  async getName () {
-    const name = await multicall.load(`${this.address}-name`, this.readContract.name())
+  async getName() {
+    const name = await multicall.load(
+      `${this.address}-name`,
+      this.readContract.name()
+    )
     this.name = name
     return name
   }
 
-  async getSymbol () {
-    const symbol = await multicall.load(`${this.address}-symbol`, this.readContract.symbol())
+  async getSymbol() {
+    const symbol = await multicall.load(
+      `${this.address}-symbol`,
+      this.readContract.symbol()
+    )
     this.symbol = symbol
     return symbol
   }
 
-  async getDecimals () {
-    const decimals = await multicall.load(`${this.address}-decimals`, this.readContract.decimals())
+  async getDecimals() {
+    const decimals = await multicall.load(
+      `${this.address}-decimals`,
+      this.readContract.decimals()
+    )
     this.decimals = decimals
     return decimals
   }
@@ -100,25 +112,19 @@ export class Token implements BaseContract {
   async init() {
     const tasks = [this.getBalance()]
     if (!this.name) {
-      tasks.push(
-        this.getName()
-      )
+      tasks.push(this.getName())
     }
     if (!this.symbol) {
-      tasks.push(
-        this.getSymbol()
-      )
+      tasks.push(this.getSymbol())
     }
     if (!this.decimals && this.decimals !== 0) {
-      tasks.push(
-        this.getDecimals()
-      )
+      tasks.push(this.getDecimals())
     }
     await Promise.all(tasks)
     this.isInit = true
-      // multicall.load(`${this.address}-name`, this.readContract.name()),
-      // multicall.load(`${this.address}-symbol`, this.readContract.symbol()),
-      // multicall.load(`${this.address}-decimals`, this.readContract.decimals()),
+    // multicall.load(`${this.address}-name`, this.readContract.name()),
+    // multicall.load(`${this.address}-symbol`, this.readContract.symbol()),
+    // multicall.load(`${this.address}-decimals`, this.readContract.decimals()),
     // if (name) {
     //   this.name = name
     // }

@@ -1,3 +1,5 @@
+import {ee} from '../lib/event.ts'
+
 export default ({app}, inject) => {
   // console-log =========================================================================================================//
   const log = (...msgs) => {
@@ -35,6 +37,9 @@ export default ({app}, inject) => {
   }
   // usage $alert(key, {title, desc})
   inject('alert', alerts);
+  ee.on('alerts', (key, message) => {
+    alerts(key, message)
+  })
 
 
   // scroll-to =========================================================================================================//
@@ -85,11 +90,11 @@ export default ({app}, inject) => {
   const formData = (form) => {
     const formData = new FormData();
     for (const [keys, values] of Object.entries(form)) {
-      // set empty string in null 
+      // set empty string in null
       if (form[keys] && typeof form[keys] === "object") {
         Object.keys(values).forEach(key => { values[key] ??= "" })
       } else { form[keys] ??= "" }
-      
+
       // push to form data
       const
         excludeUrl = !(/\.(gif|jpg|jpeg|tiff|png)$/i).test(values),

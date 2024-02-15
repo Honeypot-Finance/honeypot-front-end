@@ -25,9 +25,10 @@ export class Network {
     factory: FactoryContract
   }
   tokens: Token[] = []
+  multicallAddress!: string
 
   get readProvider() {
-    return new ethers.providers.JsonRpcProvider(
+    return new ethers.providers.JsonRpcBatchProvider(
       this.rpcUrls?.[0]
     )
   }
@@ -60,7 +61,8 @@ export const PolygonTestNetwork =  new Network({
       address: '0x333bB9e7Aa8E02017E92cBAe2A8D500be7c0B95F'
     }),
   },
-  tokens: polygonTestTokens.map((t: any) => new Token(t))
+  tokens: polygonTestTokens.map((t: any) => new Token(t)),
+  multicallAddress: '0xcA11bde05977b3631167028862bE2a173976CA11'
 })
 
 
@@ -82,7 +84,8 @@ export const BerachainTestNetwork =  new Network({
       address: '0x5C4cDd0160c0CB4C606365dD98783064335A9ce0'
     }),
   },
-  tokens: berachainTestTokens.map((t: any) => new Token(t))
+  tokens: berachainTestTokens.map((t: any) => new Token(t)),
+  multicallAddress: '0x9d1dB8253105b007DDDE65Ce262f701814B91125'
 })
 
 // export const ScrollTestNetwork =  new Network({

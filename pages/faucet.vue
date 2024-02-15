@@ -71,13 +71,11 @@ export default {
     async claimFaucet(item) {
       item.faucetLoading = true
       try {
-        const res =  await item.faucet()
-        await item.getBalance()
+         await item.faucet()
         this.$alert("success", 'Transaction approved for ' + item.name, { persistent: true })
         //
       } catch (error) {
         console.error(error)
-        this.$alert("cancel", error.message, { persistent: true })
       }
       item.faucetLoading = false
     }
