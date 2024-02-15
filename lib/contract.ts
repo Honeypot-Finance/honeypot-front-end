@@ -16,10 +16,11 @@ export const exec = async (contract: Contract, contractMethod: string, args: any
        throw error
     }
     console.error(error, `${contractMethod}-estimatedGas`)
+    throw error
   }
   if (estimatedGas) {
     execArgs.push({
-      gasLimit: new BigNumber(estimatedGas.toString()).multipliedBy(1.25).toFixed(0),
+      gasLimit: new BigNumber(estimatedGas.toString()).multipliedBy(2).toFixed(0),
     })
   } else {
     const manualGas = ethers.utils.parseUnits('36000', 'wei')

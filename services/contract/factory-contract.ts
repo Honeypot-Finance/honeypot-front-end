@@ -8,7 +8,6 @@ import { Signer, ethers } from "ethers";
 import { Contract } from "ethcall";
 import { makeAutoObservable } from "~/lib/observer";
 import { reaction } from "~/lib/event";
-import { multicall } from "./multicall";
 
 export class FactoryContract implements BaseContract {
   address = ''
@@ -28,8 +27,12 @@ export class FactoryContract implements BaseContract {
     makeAutoObservable(this)
   }
 
+  get multicall () {
+    return wallet.currentNetwork.multicall
+  }
+
   allPairs (index: number) {
-    return multicall.load(`${index}-allPairs`, this.readContract.allPairs(index))
+    return this.multicall.load(`${index}-allPairs`, this.readContract.allPairs(index))
   }
 
 }

@@ -6,7 +6,6 @@ import Vue from 'vue'
 
 
 class Faucet {
-  //  tokens = faucetTokens.map(t => new Token(t as any as Token))
    constructor() {
     makeAutoObservable(this)
    }

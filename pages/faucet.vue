@@ -20,7 +20,7 @@
     </section>
 
     <!-- need empty image here -->
-    <v-data-table :headers="tableHeaders"  :items="$wallet.currentNetwork.tokens" hide-default-footer mobile-breakpoint="-1">
+    <v-data-table :loading="!$wallet.currentNetwork.isInit" :headers="tableHeaders"  :items="$wallet.currentNetwork.tokens" hide-default-footer mobile-breakpoint="-1">
       <template #[`item.name`]="{ item }">
         <div class="acenter font2" style="gap: 10px">
           <v-sheet color="transparent" style="--h-sheet: 40px">

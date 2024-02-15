@@ -7,7 +7,6 @@ import { Contract } from 'ethcall'
 import { makeAutoObservable } from '~/lib/observer'
 import { reaction, when } from '~/lib/event'
 import { wallet } from '../wallet'
-import { multicall } from './multicall'
 import IUniswapV2Pair from '@uniswap/v2-core/build/IUniswapV2Pair.json'
 import { exec } from '~/lib/contract'
 
@@ -50,6 +49,10 @@ export class PairContract implements BaseContract {
     return wallet.currentNetwork.contracts.routerV2
   }
 
+  get multicall () {
+    return wallet.currentNetwork.multicall
+  }
+
   constructor(args: Partial<PairContract>) {
     Object.assign(this, args)
     this.token = new Token({
@@ -79,7 +82,7 @@ export class PairContract implements BaseContract {
   }
 
   async getReserves() {
-    const reserves = await multicall.load(
+    const reserves = await this.multicall.load(
       `${this.address}-getReserves`,
       this.readContract.getReserves()
     )
@@ -87,7 +90,7 @@ export class PairContract implements BaseContract {
   }
 
   async getTotalSupply() {
-    const totalSupply = await multicall.load(
+    const totalSupply = await this.multicall.load(
       `${this.address}-getTotalSupply`,
       this.readContract.totalSupply()
     )
@@ -95,7 +98,7 @@ export class PairContract implements BaseContract {
   }
 
   async getToken0() {
-    const token0 = await multicall.load(
+    const token0 = await this.multicall.load(
       `${this.address}-getToken0`,
       this.readContract.token0()
     )
@@ -105,7 +108,7 @@ export class PairContract implements BaseContract {
   }
 
   async getToken1() {
-    const token1 = await multicall.load(
+    const token1 = await this.multicall.load(
       `${this.address}-getToken1`,
       this.readContract.token1()
     )

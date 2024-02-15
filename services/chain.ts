@@ -8,6 +8,8 @@ import { FactoryContract } from './contract/factory-contract'
 import { makeAutoObservable } from '~/lib/observer'
 import BigNumber from 'bignumber.js'
 import { ethers } from 'ethers'
+import { when } from '~/lib/event'
+import { Multicall } from './contract/multicall';
 
 export class Network {
   chainId!: string
@@ -25,15 +27,31 @@ export class Network {
     factory: FactoryContract
   }
   tokens: Token[] = []
+  isInit = false
   multicallAddress!: string
+  get multicall() {
+    return new Multicall({
+      address: this.multicallAddress,
+      readProvider: this.readProvider
+    })
+  }
 
   get readProvider() {
     return new ethers.providers.JsonRpcBatchProvider(
       this.rpcUrls?.[0]
     )
   }
-  constructor(args: Partial<Network>) {
+  constructor({tokens, ...args}: Partial<Network>) {
     Object.assign(this, args)
+    if (tokens) {
+      this.tokens = tokens.map((t: any) => new Token({
+        ...t,
+        _multicall: this.multicall
+      }))
+    }
+    when(() => this.tokens.length && this.tokens.every(t => t.isInit), () => {
+      this.isInit = true
+    })
     makeAutoObservable(this)
   }
   async getBalance (account: string) {
@@ -61,7 +79,7 @@ export const PolygonTestNetwork =  new Network({
       address: '0x333bB9e7Aa8E02017E92cBAe2A8D500be7c0B95F'
     }),
   },
-  tokens: polygonTestTokens.map((t: any) => new Token(t)),
+  tokens: polygonTestTokens as any[],
   multicallAddress: '0xcA11bde05977b3631167028862bE2a173976CA11'
 })
 
@@ -84,7 +102,7 @@ export const BerachainTestNetwork =  new Network({
       address: '0x5C4cDd0160c0CB4C606365dD98783064335A9ce0'
     }),
   },
-  tokens: berachainTestTokens.map((t: any) => new Token(t)),
+  tokens: berachainTestTokens as any[],
   multicallAddress: '0x9d1dB8253105b007DDDE65Ce262f701814B91125'
 })
 

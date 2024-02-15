@@ -6,9 +6,9 @@ import { Contract } from 'ethcall'
 import faucetABI from '~/static/abis/faucet.json'
 import { makeAutoObservable } from '~/lib/observer'
 import { reaction, when } from '~/lib/event'
-import { multicall } from './multicall'
 import { wallet } from '../wallet'
 import { exec } from '~/lib/contract'
+import { Multicall } from './multicall'
 
 export class Token implements BaseContract {
   address: string = ''
@@ -20,6 +20,7 @@ export class Token implements BaseContract {
   abi = ERC20ABI
   faucetLoading = false
   isInit = false
+  _multicall?: Multicall
   get signer() {
     return wallet.signer
   }
@@ -31,6 +32,10 @@ export class Token implements BaseContract {
   }
   get contract() {
     return new ethers.Contract(this.address, this.abi, this.signer)
+  }
+
+  get multicall () {
+    return this._multicall || wallet.currentNetwork.multicall
   }
 
   constructor({ balance, address, ...args }: Partial<Token>) {
@@ -69,7 +74,7 @@ export class Token implements BaseContract {
 
   async getBalance() {
     await when(() => wallet?.account)
-    const balance = await multicall.load(
+    const balance = await this.multicall.load(
       `${this.address}-${wallet.account}-getBalance`,
       this.readContract.balanceOf(wallet.account)
     )
@@ -79,11 +84,12 @@ export class Token implements BaseContract {
           new BigNumber(10).pow(this.decimals)
         )
       : new BigNumber(0)
+      console.log('balance', this.balance.toString())
     return this.balance
   }
 
   async getName() {
-    const name = await multicall.load(
+    const name = await  this.multicall.load(
       `${this.address}-name`,
       this.readContract.name()
     )
@@ -92,7 +98,7 @@ export class Token implements BaseContract {
   }
 
   async getSymbol() {
-    const symbol = await multicall.load(
+    const symbol = await this.multicall.load(
       `${this.address}-symbol`,
       this.readContract.symbol()
     )
@@ -101,7 +107,7 @@ export class Token implements BaseContract {
   }
 
   async getDecimals() {
-    const decimals = await multicall.load(
+    const decimals = await this.multicall.load(
       `${this.address}-decimals`,
       this.readContract.decimals()
     )

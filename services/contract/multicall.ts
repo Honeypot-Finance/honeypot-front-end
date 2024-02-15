@@ -4,11 +4,10 @@ import { wallet } from '../wallet'
 import Vue from 'vue'
 import { when } from '~/lib/event'
 import pRetry from 'p-retry'
+import { ethers } from 'ethers'
 
 export class Multicall {
-  get address() {
-    return wallet.currentNetwork.multicallAddress
-  }
+  address!:string
   cache = new Map()
   lock = false
   limit = 10
@@ -19,14 +18,19 @@ export class Multicall {
     result?: any
     reject: any
   }[] = []
+  readProvider: ethers.providers.Provider
   get provider() {
     const provider = new Provider()
     // @ts-ignore
     provider.multicall3 = {
       address: this.address,
     }
-    provider.init(wallet.readProvider)
+    provider.init(this.readProvider)
     return provider
+  }
+
+  constructor(args: Partial<Multicall>) {
+    Object.assign(this, args)
   }
 
   async tryAll(calls: Call[]) {
@@ -34,6 +38,7 @@ export class Multicall {
   }
 
   async load(key: string, call: any) {
+    await when(() => wallet?.currentChainId)
     key = `${wallet?.currentChainId}-${key}`
     if (this.cache.has(key)) {
       return this.cache.get(key)
@@ -65,5 +70,3 @@ export class Multicall {
   }
 }
 
-export const multicall = new Multicall()
-Vue.prototype.$multicall = multicall
