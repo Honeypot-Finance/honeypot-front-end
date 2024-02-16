@@ -63,7 +63,7 @@ export class Multicall {
           t.result = data[index]
           t.resolve(data[index])
         })
-      }, 1000)
+      }, 100)
     }
     this.lock = true
     return res

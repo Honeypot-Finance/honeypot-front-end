@@ -29,12 +29,7 @@ export class Network {
   tokens: Token[] = []
   isInit = false
   multicallAddress!: string
-  get multicall() {
-    return new Multicall({
-      address: this.multicallAddress,
-      readProvider: this.readProvider
-    })
-  }
+  multicall: Multicall
 
   get readProvider() {
     return new ethers.providers.JsonRpcBatchProvider(
@@ -43,6 +38,10 @@ export class Network {
   }
   constructor({tokens, ...args}: Partial<Network>) {
     Object.assign(this, args)
+    this.multicall = new Multicall({
+      address: this.multicallAddress,
+      readProvider: this.readProvider
+    })
     if (tokens) {
       this.tokens = tokens.map((t: any) => new Token({
         ...t,
