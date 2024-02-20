@@ -55,10 +55,10 @@ export class PairContract implements BaseContract {
 
   constructor(args: Partial<PairContract>) {
     Object.assign(this, args)
-    this.token = new Token({
-      address: this.address,
-    })
-    this.init()
+
+    if (this.address) {
+      this.init()
+    }
     when(
       () => this.token0?.isInit && this.token1?.isInit && this.isInit,
       () => {
@@ -118,13 +118,14 @@ export class PairContract implements BaseContract {
   }
 
   async init() {
+    this.token = new Token({
+      address: this.address,
+    })
     await Promise.all([this.getReserves(), this.getToken0(), this.getToken1(), this.getTotalSupply()])
     await this.getPricing()
     await when(() => this.token.isInit)
     this.token0LpBalance = !new BigNumber(this.totalSupply || 0).eq(0) ? new BigNumber(this.reserves.reserve0.toString()).multipliedBy(this.token.balance).div(this.totalSupply) : new BigNumber(0)
     this.token1LpBalance =  !new BigNumber(this.totalSupply || 0).eq(0) ? new BigNumber(this.reserves.reserve1.toString()).multipliedBy(this.token.balance).div(this.totalSupply) : new BigNumber(0)
-
-    console.log('this.liquidity', this.token0LpBalance.toFixed(2), this.token1LpBalance.toFixed(2))
     this.isInit = true
   }
   async getPricing() {
@@ -160,17 +161,18 @@ export class PairContract implements BaseContract {
     await when(() => this.token.isInit)
     const liquidity = this.token.balance.multipliedBy(percent).div(100).multipliedBy(new BigNumber(10).pow(this.token.decimals))
     if(liquidity.gt(0)){
-      await this.token.approve(liquidity.toFixed(), this.routerV2Contract.address)
+      await this.token.approve(liquidity.toFixed(0), this.routerV2Contract.address)
       const deadline = Math.floor(Date.now() / 1000) + 60 * 20; // 20 mins time
       const args: any[] = [
         this.token0.address,
         this.token1.address,
-        liquidity.toFixed(),
+        liquidity.toFixed(0),
         0,
         0,
         wallet.account,
         deadline]
       await exec(this.routerV2Contract.contract, 'removeLiquidity', args)
+      await this.init()
     }
   }
 }

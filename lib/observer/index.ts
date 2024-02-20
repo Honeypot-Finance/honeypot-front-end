@@ -28,9 +28,10 @@ function observeEvent(obj) {
   Object.defineProperties(obj, objProperties)
 }
 export const makeAutoObservable = (args, plugins?: Plugin[]) => {
-  Vue.observable(args)
+  const observer = Vue.observable(args)
   observeEvent(args)
   if (plugins?.length) {
     Plugin.addPlugins(args, plugins)
   }
+  return observer
 }

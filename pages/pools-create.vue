@@ -219,7 +219,7 @@
 
         <!-- remove tab -->
         <v-sheet v-else id="container-remove" class="divcol fill_w" color="transparent" style="gap: 20px">
-          <template v-if="!$liquidity.currentRemovePair">
+          <template v-if="!($liquidity.currentRemovePair)">
             <v-card :loading="$liquidity.liquidityLoading" v-for="(item, i) in $liquidity.pairs" :key="i" class="card space" style="--b: 3px solid #292724; --br: 20px; --p: 20px; --h: 85px">
               <div class="center font2" style="gap: 10px">
                 <!-- <v-sheet class="dual-tokens" color="transparent">
@@ -232,7 +232,7 @@
 
               <v-btn
                 class="btn2 font3" style="--b: 1px solid #292724; --br: 30px; --p: 11px 12px"
-                @click="$liquidity.currentRemovePair = item"
+                @click="$liquidity.setCurrentRemovePair(item)"
               >
                 <span style="--c: var(--accent); --fw: 500: --fs: 14">Remove</span>
               </v-btn>
@@ -366,7 +366,8 @@ export default {
       //   return
       // }
       this.removeLiquidityLoading = true
-      await this.$liquidity.currentPair.removeLiquidity(this.withdrawSelected)
+      console.dir(this.$liquidity.currentRemovePair)
+      await this.$liquidity.currentRemovePair.removeLiquidity(this.withdrawSelected)
       this.removeLiquidityLoading = false
       this.$alert("success", "Liquidity removed successfuly")
       await this.$liquidity.getPools()

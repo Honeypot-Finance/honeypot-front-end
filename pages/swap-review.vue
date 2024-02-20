@@ -39,7 +39,7 @@
         </div> -->
       </section>
 
-      <v-btn class="btn stylish" @click="confirm()">swap</v-btn>
+      <v-btn class="btn stylish" :loading="swapLoading" @click="confirm()">swap</v-btn>
     </section>
   </div>
 </template>
@@ -52,6 +52,7 @@ export default {
   mixins: [computeds],
   data() {
     return {
+      swapLoading: false
     }
   },
   head() {
@@ -67,7 +68,9 @@ export default {
   },
   methods: {
     async confirm() {
+      this.swapLoading = true
       try {
+
         const validate = this.$swap.swapValidate()
         console.log('validate', validate)
         if (typeof validate === 'string') {
@@ -81,7 +84,7 @@ export default {
         // const errorJSON = JSON.parse(error.toString().split("Internal JSON-RPC error.")[1])
         this.$alert('cancel',error.toString())
       }
-
+     this.swapLoading = false
 
     },
   }

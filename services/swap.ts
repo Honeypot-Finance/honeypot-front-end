@@ -136,6 +136,7 @@ class Swap {
       deadline,
     ]
     await exec(this.routerV2Contract.contract, 'swapExactTokensForTokens', args)
+    await Promise.all([liquidity.resetPool(`${this.fromToken.address}-${this.toToken.address}`), this.fromToken.getBalance(), this.toToken.getBalance()])
     return true
   }
 

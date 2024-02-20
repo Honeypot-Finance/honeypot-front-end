@@ -34,7 +34,7 @@ class Liquidity {
 
   liquidityLoading = false
 
-  currentRemovePair: PairContract | null = null
+  currentRemovePair: PairContract | null  =  null
 
   get tokens() {
     return tokensConfig[wallet.currentChainId].map((t) => new Token(t))
@@ -69,6 +69,10 @@ class Liquidity {
       }
     })
     makeAutoObservable(this)
+  }
+
+  setCurrentRemovePair(pair: PairContract) {
+    this.currentRemovePair = new PairContract(pair)
   }
 
   switchTokens() {
@@ -106,6 +110,12 @@ class Liquidity {
       deadline,
     ]
     await exec(this.routerV2Contract.contract, 'addLiquidity', args)
+    await Promise.all([liquidity.resetPool(`${this.token0.address}-${this.token1.address}`), this.token0.getBalance(), this.token1.getBalance()])
+  }
+
+  async resetPool (tokenPair: string) {
+     const pair  =  this.pairsByToken[tokenPair]
+     await pair.init()
   }
 
   async getPools() {
