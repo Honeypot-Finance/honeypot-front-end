@@ -24,7 +24,6 @@ function observeEvent(obj) {
       },
     }
   })
-
   Object.defineProperties(obj, objProperties)
 }
 export const makeAutoObservable = (args, plugins?: Plugin[]) => {

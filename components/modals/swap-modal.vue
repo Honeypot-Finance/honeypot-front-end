@@ -1,7 +1,7 @@
 <template>
   <div>
-    <ModalsTokens ref="tokens" :from="swapFrom" :to="swapTo"></ModalsTokens>
-    
+    <ModalsTokens ref="tokens" :tokens="$liquidity.pairsTokens" :from="swapFrom" :to="swapTo"></ModalsTokens>
+
     <v-dialog v-model="modalSwap" content-class="modalSwap relative" max-width="588px">
       <v-btn icon class="close" style="--d: 10px" @click="modalSwap = false">
         <v-icon>mdi-close</v-icon>

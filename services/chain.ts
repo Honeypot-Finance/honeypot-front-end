@@ -27,31 +27,37 @@ export class Network {
     factory: FactoryContract
   }
   tokens: Token[] = []
+  _tokens: any [] = []
   isInit = false
   multicallAddress!: string
   multicall: Multicall
+  multicallLimit: number
+  pairTokens: Token[] = []
 
   get readProvider() {
-    return new ethers.providers.JsonRpcBatchProvider(
+    return new ethers.providers.JsonRpcProvider(
       this.rpcUrls?.[0]
     )
   }
   constructor({tokens, ...args}: Partial<Network>) {
     Object.assign(this, args)
-    this.multicall = new Multicall({
-      address: this.multicallAddress,
-      readProvider: this.readProvider
-    })
-    if (tokens) {
-      this.tokens = tokens.map((t: any) => new Token({
-        ...t,
-        _multicall: this.multicall
-      }))
-    }
+    this._tokens = tokens ||[]
     when(() => this.tokens.length && this.tokens.every(t => t.isInit), () => {
       this.isInit = true
     })
     makeAutoObservable(this)
+  }
+  init () {
+    this.multicall = new Multicall({
+      address: this.multicallAddress,
+      limit: this.multicallLimit,
+      readProvider: this.readProvider
+    })
+    this.tokens = this._tokens.map((t: any) => new Token({
+      ...t,
+      _multicall: this.multicall
+    }))
+
   }
   async getBalance (account: string) {
     const balance = await this.readProvider.getBalance(account)
@@ -75,11 +81,12 @@ export const PolygonTestNetwork =  new Network({
       address: '0x2ef225538c9FcE4641e038Fd6FA64cA5519cF971',
     }),
     factory: new FactoryContract({
-      address: '0x333bB9e7Aa8E02017E92cBAe2A8D500be7c0B95F'
+      address: '0x5AD84056574066c774C5e58BC4a0652b6c171253'
     }),
   },
   tokens: polygonTestTokens as any[],
-  multicallAddress: '0xcA11bde05977b3631167028862bE2a173976CA11'
+  multicallAddress: '0xcA11bde05977b3631167028862bE2a173976CA11',
+  multicallLimit:50,
 })
 
 
@@ -102,7 +109,8 @@ export const BerachainTestNetwork =  new Network({
     }),
   },
   tokens: berachainTestTokens as any[],
-  multicallAddress: '0x9d1dB8253105b007DDDE65Ce262f701814B91125'
+  multicallAddress: '0x9d1dB8253105b007DDDE65Ce262f701814B91125',
+  multicallLimit: 25
 })
 
 // export const ScrollTestNetwork =  new Network({

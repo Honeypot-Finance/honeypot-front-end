@@ -1,3 +1,4 @@
+import { exec } from '~/lib/contract';
 
 
 import { BaseContract } from "."
@@ -8,6 +9,7 @@ import { Signer, ethers } from "ethers";
 import { Contract } from "ethcall";
 import { makeAutoObservable } from "~/lib/observer";
 import { reaction } from "~/lib/event";
+import BigNumber from "bignumber.js";
 
 export class FactoryContract implements BaseContract {
   address = ''
@@ -35,5 +37,20 @@ export class FactoryContract implements BaseContract {
     return this.multicall.load(`${index}-allPairs`, this.readContract.allPairs(index))
   }
 
+  allPairsLength () {
+    return this.multicall.load(`allPairs`, this.readContract.allPairsLength())
+  }
+
+  async launchToken ({tokenAddress, tokenName, tokenSymbol, tokenAmount, poolHandler, campaignDuration}) {
+    const args: any [] = [
+      tokenAddress,
+      tokenName,
+      tokenSymbol,
+      new BigNumber(tokenAmount).multipliedBy(new BigNumber(10).pow(18)).toFixed(),
+      poolHandler,
+      campaignDuration
+    ]
+    await exec(this.contract, 'createFTO', args)
+  }
 }
 

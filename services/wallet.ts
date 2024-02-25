@@ -7,7 +7,7 @@ import { reaction, when } from '~/lib/event'
 import BigNumber from 'bignumber.js'
 
 export class Wallet {
-  account: string = ''
+  account: string
   accountShort = ''
   isConnect = false
   ethereum: any = null
@@ -15,6 +15,7 @@ export class Wallet {
   networks = networks || []
   currentNetwork: Network
   balance: BigNumber = new BigNumber(0)
+  provider: ethers.providers.Web3Provider
 
   get readProvider() {
      return this.currentNetwork?.readProvider
@@ -27,10 +28,6 @@ export class Wallet {
     }, {})
   }
 
-  get provider() {
-    return new ethers.providers.Web3Provider(this.ethereum)
-  }
-
   // get currentNetwork() {
   //   return this.networksMap[this.currentChainId] || ({} as Network)
   // }
@@ -40,38 +37,30 @@ export class Wallet {
   }
 
   constructor({ account, currentChainId, ...args }: Partial<Wallet>) {
-    //@ts-ignore
-    this.ethereum = window.ethereum
-    when(() => this.ethereum, () => {
-      this.ethereum.on('chainChanged', this.handleChainChanged)
-      this.ethereum.on('accountsChanged', this.handleAccountsChanged)
+    this.provider = new ethers.providers.Web3Provider(window.ethereum)
+    when(() => window.ethereum, () => {
+      window.ethereum.on('chainChanged', this.handleChainChanged)
+      window.ethereum.on('accountsChanged', this.handleAccountsChanged)
     })
 
     Object.assign(this, args)
-    if (account) {
-      this.setAccount(account)
-    }
-    if (currentChainId) {
-      this.setCurrentNetwork(currentChainId)
-      this.currentNetwork =
-      this.networksMap[this.currentChainId] || ({} as Network)
-    }
-    reaction(() => this.currentChainId, () => {
-      if (this.currentChainId) {
-        this.currentNetwork =
-        this.networksMap[this.currentChainId] || ({} as Network)
-        if (this.account) {
-          this.currentNetwork.getBalance(this.account)
-        }
-      }
-
-    })
+    this.setAccount(account)
     reaction(() => this.account, () => {
       if (this.currentChainId && this.account) {
         this.currentNetwork.getBalance(this.account)
       }
     })
     makeAutoObservable(this, [new StorePlugin({ observerKeys: ['currentChainId'], namespace: 'wallet', target: this})])
+    reaction(() => this.currentChainId, () => {
+      if (this.currentChainId) {
+        this.currentNetwork =
+        this.networksMap[this.currentChainId] || ({} as Network)
+        this.currentNetwork.init()
+        if (this.account) {
+          this.currentNetwork.getBalance(this.account)
+        }
+      }
+    }, true)
   }
   //  signer:
 
@@ -81,9 +70,11 @@ export class Wallet {
 
 
   setAccount(account: string) {
-    this.account = account
-    this.accountShort = this.account.substring(0, 19) + '...'
-    this.isConnect = !!this.account
+    if (account) {
+      this.account = account
+      this.accountShort = this.account.substring(0, 19) + '...'
+      this.isConnect = !!this.account
+    }
   }
 
   detectProvider() {
@@ -93,7 +84,7 @@ export class Wallet {
 
   async addNetwork(chainId: string) {
     const network = this.networksMap[chainId]
-    await this.ethereum.request({
+    await  window.ethereum.request({
       method: 'wallet_addEthereumChain',
       params: [
         {
@@ -114,7 +105,7 @@ export class Wallet {
       return
     }
     try {
-      await this.ethereum.request({
+      await  window.ethereum.request({
         method: 'wallet_switchEthereumChain',
         params: [{ chainId }],
       })
@@ -152,12 +143,12 @@ export class Wallet {
       alert('Please install MetaMask!')
       return
     }
-    const accounts = await this.ethereum.request({
+    const accounts = await  window.ethereum.request({
       method: 'eth_requestAccounts',
       params: [],
     })
     this.handleAccountsChanged(accounts)
-    const chainId = await this.ethereum.request({ method: 'eth_chainId' })
+    const chainId = await  window.ethereum.request({ method: 'eth_chainId' })
     if (chainId !== this.currentChainId) {
       this.switchToNetwork(this.currentChainId)
     }
@@ -165,7 +156,7 @@ export class Wallet {
 }
 
 export const wallet = new Wallet({
-  currentChainId: networks?.[0].chainId,
+  currentChainId: networks?.[0].chainId
 })
 wallet.connect()
 Vue.prototype.$wallet = wallet

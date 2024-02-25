@@ -97,5 +97,49 @@
       { "type": "uint256", "name": "", "indexed": false }
     ],
     "anonymous": false
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "tokenA",
+        "type": "address"
+      },
+      {
+        "internalType": "string",
+        "name": "name",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "symbol",
+        "type": "string"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_amount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "poolHandler",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "rasing_cycle",
+        "type": "uint256"
+      }
+    ],
+    "name": "createFTO",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "pair",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
   }
 ]

@@ -1,3 +1,4 @@
+
 <template>
   <!-- modal token -->
   <v-dialog v-model="modalTokensOpen" width="447px" content-class="modalTokens">
@@ -74,6 +75,10 @@ export default {
      oppositeToken: {
        type: Object,
        default: undefined
+     },
+     tokens: {
+       type: Array,
+       default: () =>  []
      }
   },
   data() {
@@ -87,14 +92,14 @@ export default {
   computed: {
     filterDataTokens() {
       if (!this.searchToken && this.searchToken !== 0) {
-         return this.$wallet.currentNetwork.tokens
+         return this.tokens
       }
-      return this.$wallet.currentNetwork.tokens.filter(data => {
+      return this.tokens.filter(data => {
         return data.name.toLowerCase().includes(this.searchToken.toLowerCase())
       })
     },
     dataPopularTokens () {
-      return this.$wallet.currentNetwork.tokens.slice(0, 3)
+      return this.tokens.slice(0, 3)
     },
 
   },

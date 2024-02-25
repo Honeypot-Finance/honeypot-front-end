@@ -72,7 +72,7 @@ export default {
       try {
 
         const validate = this.$swap.swapValidate()
-        console.log('validate', validate)
+        // console.log('validate', validate)
         if (typeof validate === 'string') {
            return this.$alert('cancel', validate)
         }

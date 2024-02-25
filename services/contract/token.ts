@@ -43,14 +43,16 @@ export class Token implements BaseContract {
     if (balance) {
       this.balance = new BigNumber(balance)
     }
-    this.address = address.toLowerCase()
-    this.init()
-    reaction(
-      () => wallet.account,
-      () => {
-        this.getBalance()
-      }
-    )
+    if (address) {
+      this.address = address.toLowerCase()
+      this.init()
+      reaction(
+        () => wallet.account,
+        () => {
+          this.getBalance()
+        }
+      )
+    }
     // reaction(() => wallet.currentChainId, () => {
     //   this.getBalance()
     // })
@@ -84,7 +86,7 @@ export class Token implements BaseContract {
           new BigNumber(10).pow(this.decimals)
         )
       : new BigNumber(0)
-      console.log('balance', this.balance.toString())
+      // console.log('balance', this.address, this.balance.toString())
     return this.balance
   }
 

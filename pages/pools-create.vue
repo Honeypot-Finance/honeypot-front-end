@@ -1,7 +1,7 @@
 <template>
   <div id="pools-create" class="divcol" style="gap: 30px">
-    <ModalsTokens ref="tokens0" :token="$liquidity.token0" @select="(t) => $liquidity.token0=t" @switch="$liquidity.switchTokens()" :oppositeToken="$liquidity.token1" ></ModalsTokens>
-    <ModalsTokens ref="tokens1" :token="$liquidity.token1" @select="(t) => $liquidity.token1=t" @switch="$liquidity.switchTokens()" :oppositeToken="$liquidity.token0"></ModalsTokens>
+    <ModalsTokens :tokens="$wallet.currentNetwork.tokens" ref="tokens0" :token="$liquidity.token0" @select="(t) => $liquidity.token0=t" @switch="$liquidity.switchTokens()" :oppositeToken="$liquidity.token1" ></ModalsTokens>
+    <ModalsTokens :tokens="$wallet.currentNetwork.tokens" ref="tokens1" :token="$liquidity.token1" @select="(t) => $liquidity.token1=t" @switch="$liquidity.switchTokens()" :oppositeToken="$liquidity.token0"></ModalsTokens>
     <section id="pools-create-header" class="divcol" style="gap: 10px">
       <label class="maxsize_w hover_arrowback pointer" style="--fs: 21px" @click="$router.push(localePath('/pools'))">
         <v-icon size="1.5em">mdi-chevron-left</v-icon>

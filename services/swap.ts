@@ -14,8 +14,8 @@ import { reaction, when } from '~/lib/event'
 import { exec } from '~/lib/contract'
 
 class Swap {
-  fromToken: Token = wallet.currentNetwork.tokens[0]
-  toToken: Token = wallet.currentNetwork.tokens[1]
+  fromToken: Token = new Token({})
+  toToken: Token = new Token({})
 
   fromAmount: string = ''
   toAmount: string = ''
@@ -73,7 +73,7 @@ class Swap {
         return null
       }
       this.fromAmount = ''
-      console.log('')
+      // console.log('')
       this.currentPair = liquidity.pairsByToken?.[
         `${this.fromToken.address}-${this.toToken.address}`
       ]
@@ -88,7 +88,7 @@ class Swap {
       ]
     })
     when(() => liquidity?.pairsByToken && this.fromToken && this.toToken, () => {
-      console.log('when', liquidity.pairsByToken, `${this.fromToken.address}-${this.toToken.address}`)
+      // console.log('when', liquidity.pairsByToken, `${this.fromToken.address}-${this.toToken.address}`)
       this.currentPair = liquidity.pairsByToken[
         `${this.fromToken.address}-${this.toToken.address}`
       ]
@@ -99,9 +99,9 @@ class Swap {
       }
 
     })
-    reaction(() => wallet.currentNetwork, () => {
-      this.fromToken = wallet.currentNetwork.tokens[0]
-      this.toToken = wallet.currentNetwork.tokens[1]
+    reaction(() => liquidity.pairs, () => {
+      this.fromToken = liquidity.pairs[0]?.token0 || new Token({})
+      this.toToken = liquidity.pairs[0]?.token1 || new Token({})
     })
     makeAutoObservable(this)
   }

@@ -1,8 +1,8 @@
 <template>
   <div id="swap">
     <ModalsSwap ref="modal"></ModalsSwap>
-    <ModalsTokens ref="fromTokens" @select="onFromSelect" :token="$swap.fromToken" :oppositeToken="$swap.toToken" @switch="$swap.switchTokens()" ></ModalsTokens>
-    <ModalsTokens ref="toTokens" @select="(token) => {
+    <ModalsTokens :tokens="$liquidity.pairsTokens" ref="fromTokens" @select="onFromSelect" :token="$swap.fromToken" :oppositeToken="$swap.toToken" @switch="$swap.switchTokens()" ></ModalsTokens>
+    <ModalsTokens :tokens="$liquidity.pairsTokens" ref="toTokens" @select="(token) => {
       $swap.toToken = token
     }" :token="$swap.toToken" @switch="$swap.switchTokens()"  :oppositeToken="$swap.fromToken" ></ModalsTokens>
 
@@ -210,7 +210,7 @@ export default {
   // },
   computed: {
     dataTokens () {
-      return this.$wallet.currentNetwork.tokens
+      return this.$liquidity.pairsTokens
     }
   },
   mounted() {

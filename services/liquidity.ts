@@ -11,6 +11,7 @@ import BigNumber from 'bignumber.js'
 import { makeAutoObservable } from '~/lib/observer'
 import { reaction, when } from '~/lib/event'
 import { exec } from '~/lib/contract'
+import { swap } from './swap'
 
 const tokensConfig = {
   // [mainNetwork.chainId]: scrollTokens,
@@ -25,8 +26,10 @@ class Pair {
 class Liquidity {
   pairs: PairContract[] = []
   pairsByToken: Record<string, PairContract>
-  token0: Token = wallet.currentNetwork.tokens[0]
-  token1: Token = wallet.currentNetwork.tokens[1]
+  pairsTokens: Token[] = []
+  token0: Token = new Token({})
+  token1: Token = new Token({})
+  token: Token = new Token({})
 
   token0Amount: string = ''
   token1Amount: string = ''
@@ -62,7 +65,7 @@ class Liquidity {
       if (wallet.account) {
         this.getPools()
       }
-    })
+    }, true)
     reaction(() => wallet.account, () => {
       if (wallet.currentChainId) {
         this.getPools()
@@ -110,7 +113,7 @@ class Liquidity {
       deadline,
     ]
     await exec(this.routerV2Contract.contract, 'addLiquidity', args)
-    await Promise.all([liquidity.resetPool(`${this.token0.address}-${this.token1.address}`), this.token0.getBalance(), this.token1.getBalance()])
+    await Promise.all([this.token0.getBalance(), this.token1.getBalance()])
   }
 
   async resetPool (tokenPair: string) {
@@ -121,39 +124,43 @@ class Liquidity {
   async getPools() {
     try {
       this.liquidityLoading = true
-      const poolsLength = await this.factoryContract.contract.allPairsLength()
+      const pairsTokensMap = {}
+      const poolsLength = await this.factoryContract.allPairsLength()
+      console.log('poolsLength', poolsLength.toString())
       const poolAddresses = await Promise.all(
         Array.from({ length: poolsLength }).map((i, index) => {
-          return this.factoryContract.contract.allPairs(index)
+          return this.factoryContract.allPairs(index)
         })
       )
-      const pairs = poolAddresses.map((poolAddress) => {
+      this.pairs = (await Promise.all(poolAddresses.map(async (poolAddress) => {
         const pairContract = new PairContract({
           address: poolAddress,
         })
+        // if (['0x41ffb8e98174e84faaa7133b2e6ff30537c64d66', '0x2e985184792faddc8ab9a0e855f289576a1e5dd2', '0xeeaea06afd271f665ba005aaadddbf4adceb330a', '0xa3c79e1ec388f5faaac993deeaf3bc4ebd10568b'].includes(poolAddress)){
+        //   console.log('pairContract------',pairContract)
+        // }
+        pairContract.initToken()
+        await when(() => pairContract.token.isInit)
+
         return pairContract
-      })
-      this.pairs = (
-        await Promise.all(
-          pairs.map(async (pair) => {
-            await when(() => pair.token.isInit)
-            return pair
-          })
-        )
-      ).filter((pair) => pair.token.balance.gt(0))
+      }))).filter((pair) => pair.token.balance.gt(0))
       this.pairsByToken = (
         await Promise.all(
           this.pairs.map(async (pair) => {
-            await when(() => pair.isInit)
+            await pair.init()
             return pair
           })
         )
       ).reduce((acc, cur) => {
+        pairsTokensMap[cur.token0.address] = cur.token0
+        pairsTokensMap[cur.token1.address] = cur.token1
         acc[`${cur.token0.address}-${cur.token1.address}`] = cur
         acc[`${cur.token1.address}-${cur.token0.address}`] = cur
         return acc
       }, {})
-
+      this.pairsTokens = Object.values(pairsTokensMap)
+      swap.fromToken = this.pairs[0]?.token0 || new Token({})
+      swap.toToken = this.pairs[0]?.token1 || new Token({})
     } catch (error) {
       console.error(error,'this.liquidityLoading')
     }

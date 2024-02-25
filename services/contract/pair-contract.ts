@@ -55,10 +55,6 @@ export class PairContract implements BaseContract {
 
   constructor(args: Partial<PairContract>) {
     Object.assign(this, args)
-
-    if (this.address) {
-      this.init()
-    }
     when(
       () => this.token0?.isInit && this.token1?.isInit && this.isInit,
       () => {
@@ -117,10 +113,13 @@ export class PairContract implements BaseContract {
     })
   }
 
-  async init() {
+  initToken () {
     this.token = new Token({
       address: this.address,
     })
+  }
+
+  async init() {
     await Promise.all([this.getReserves(), this.getToken0(), this.getToken1(), this.getTotalSupply()])
     await this.getPricing()
     await when(() => this.token.isInit)

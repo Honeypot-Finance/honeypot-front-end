@@ -3,7 +3,7 @@
     <section id="pools-header" class="divcol" style="gap: 10px">
       <h1 class="tcap font1 acenter" style="gap: inherit">pools</h1>
 
-      <v-card class="card space gap2">
+      <!-- <v-card class="card space gap2">
         <div class="divcol" style="gap: 10px">
           <label>Total Value Locked
             <img src="~/assets/sources/icons/info.svg" alt="info icon" style="--w: .813125em">
@@ -11,11 +11,11 @@
           <span>{{poolsLocked ? `$${poolsLocked.toLocaleString().split('.').join(',')}` : ''}}</span>
         </div>
 
-        <!-- <img
+        <img
           src="~/assets/sources/miscellaneous/locked-pools-test-img.jpg" alt="test image"
           style="--h: 123px; --ar: 1.75 / 1; border-radius: 0 !important"
-        > -->
-      </v-card>
+        >
+      </v-card> -->
     </section>
 
 

@@ -13,8 +13,8 @@
       </nuxt-link>
 
       <!-- desktop -->
-      <aside class="middle tcap deletemobile">
-        <a v-for="(item, i) in dataNavbar" :key="i" :class="{ active: $route.path.includes(item.to) }"
+      <aside class="middle tcap deletemobile align-middle">
+        <a v-for="(item, i) in dataNavbar" :key="i" :class="{ active: $route.path.includes(item.to) }" class="flex align-middle"
           @click="item.name !== 'portfolio' ? $router.push(localePath(item.to)) : ''">
           {{ item.name }}
         </a>
@@ -103,6 +103,10 @@ export default {
           to: "/pools"
         },
         // {
+        //   name: "dreampad",
+        //   to: "/dreampad"
+        // },
+        // {
         //   name: "xhpot",
         //   to: "/staking"
         // },
@@ -123,6 +127,10 @@ export default {
           name: "pools",
           to: "/pools"
         },
+        // {
+        //   name: "dreampad",
+        //   to: "/dreampad"
+        // },
         // {
         //   name: "xhpot",
         //   to: "/staking"
