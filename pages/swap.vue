@@ -122,10 +122,10 @@
         </div>
 
         <div class="grid" style="gap: inherit" @dragstart="dragstart($event)" @dragend="dragend($event)">
-          <div v-for="(item, i) in dataTokens" :key="i" class="divcol center">
-            <v-img class="aspect" style="--w: 50px">
+          <div v-for="(item, i) in dataTokens.slice(0,6)" :key="i" class="divcol center">
+            <v-img class="aspect !w-[50px] !h-[50px]">
               <template #default>
-                <img v-show="item.logoURI" :src="item.logoURI" :alt="`${item.name} token`" style="--w: 100%; --of: cover">
+                <img v-show="item.logoURI" :src="item.logoURI" :alt="`${item.name} token`" class="!w-[50px] !h-[50px]" style="--of: cover">
               </template>
               <template #placeholder>
                 <v-skeleton-loader type="avatar" />

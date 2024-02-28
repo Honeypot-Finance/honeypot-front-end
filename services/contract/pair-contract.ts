@@ -49,7 +49,7 @@ export class PairContract implements BaseContract {
     return wallet.currentNetwork.contracts.routerV2
   }
 
-  get multicall () {
+  get multicall() {
     return wallet.currentNetwork.multicall
   }
 
@@ -58,7 +58,6 @@ export class PairContract implements BaseContract {
     when(
       () => this.token0?.isInit && this.token1?.isInit && this.isInit,
       () => {
-
         this.liquidity = `${this.token0LpBalance.toFixed(2)} ${
           this.token0.symbol
         } - ${this.token1LpBalance.toFixed(2)} ${this.token1.symbol}`
@@ -69,9 +68,7 @@ export class PairContract implements BaseContract {
   }
 
   getFromAmount(toAmount) {
-    return (
-      new BigNumber(toAmount).multipliedBy(this.midPrice0).toFixed(2)
-    )
+    return new BigNumber(toAmount).multipliedBy(this.midPrice0).toFixed(2)
   }
   getToAmount(fromAmount) {
     return new BigNumber(fromAmount).multipliedBy(this.midPrice1).toFixed(2)
@@ -113,18 +110,33 @@ export class PairContract implements BaseContract {
     })
   }
 
-  initToken () {
+  initToken() {
     this.token = new Token({
       address: this.address,
     })
   }
 
   async init() {
-    await Promise.all([this.getReserves(), this.getToken0(), this.getToken1(), this.getTotalSupply()])
+    await Promise.all([
+      this.getReserves(),
+      this.getToken0(),
+      this.getToken1(),
+      this.getTotalSupply(),
+    ])
     await this.getPricing()
     await when(() => this.token.isInit)
-    this.token0LpBalance = !new BigNumber(this.totalSupply || 0).eq(0) ? new BigNumber(this.reserves.reserve0.toString()).multipliedBy(this.token.balance).div(this.totalSupply) : new BigNumber(0)
-    this.token1LpBalance =  !new BigNumber(this.totalSupply || 0).eq(0) ? new BigNumber(this.reserves.reserve1.toString()).multipliedBy(this.token.balance).div(this.totalSupply) : new BigNumber(0)
+    if (this.reserves) {
+      this.token0LpBalance = !new BigNumber(this.totalSupply || 0).eq(0)
+      ? new BigNumber(this.reserves.reserve0.toString())
+          .multipliedBy(this.token.balance)
+          .div(this.totalSupply)
+      : new BigNumber(0)
+    this.token1LpBalance = !new BigNumber(this.totalSupply || 0).eq(0)
+      ? new BigNumber(this.reserves.reserve1.toString())
+          .multipliedBy(this.token.balance)
+          .div(this.totalSupply)
+      : new BigNumber(0)
+    }
     this.isInit = true
   }
   async getPricing() {
@@ -132,36 +144,55 @@ export class PairContract implements BaseContract {
       await when(
         () =>
           this.token0.isInit &&
-          this.token1.isInit &&
-          this.reserves.reserve0 &&
-          this.reserves.reserve1
+          this.token1.isInit
       )
+      console.log('this.reserves', this.reserves, this.token0, this.token1)
+      if (!this.reserves) {
+         return
+      }
       const [midPrice0, midPrice1] = await Promise.all([
         this.routerV2Contract.contract.getAmountOut(
-          new BigNumber(1).multipliedBy(new BigNumber(10).pow(this.token0.decimals)).toFixed(),
+          new BigNumber(1)
+            .multipliedBy(new BigNumber(10).pow(this.token0.decimals))
+            .toFixed(),
           this.reserves.reserve0,
           this.reserves.reserve1
         ),
         this.routerV2Contract.contract.getAmountOut(
-          new BigNumber(1).multipliedBy(new BigNumber(10).pow(this.token1.decimals)).toFixed(),
+          new BigNumber(1)
+            .multipliedBy(new BigNumber(10).pow(this.token1.decimals))
+            .toFixed(),
           this.reserves.reserve1,
           this.reserves.reserve0
         ),
       ])
-      this.midPrice0 = new BigNumber(midPrice0.toString()).div(new BigNumber(10).pow(this.token1.decimals))
-      this.midPrice1 = new BigNumber(midPrice1.toString()).div(new BigNumber(10).pow(this.token0.decimals))
-    } catch(error) {
-      console.error(error, `${this.token0.symbol}-${this.token1.symbol}-getPricing`)
+      this.midPrice0 = new BigNumber(midPrice0.toString()).div(
+        new BigNumber(10).pow(this.token1.decimals)
+      )
+      this.midPrice1 = new BigNumber(midPrice1.toString()).div(
+        new BigNumber(10).pow(this.token0.decimals)
+      )
+    } catch (error) {
+      console.error(
+        error,
+        `${this.token0.symbol}-${this.token1.symbol}-getPricing`
+      )
       // this.$alert('cancel', 'Insuficient liquidity unable to swap ' + token0.symbol + "/" + token1.symbol)
     }
   }
 
-  async removeLiquidity (percent) {
+  async removeLiquidity(percent) {
     await when(() => this.token.isInit)
-    const liquidity = this.token.balance.multipliedBy(percent).div(100).multipliedBy(new BigNumber(10).pow(this.token.decimals))
-    if(liquidity.gt(0)){
-      await this.token.approve(liquidity.toFixed(0), this.routerV2Contract.address)
-      const deadline = Math.floor(Date.now() / 1000) + 60 * 20; // 20 mins time
+    const liquidity = this.token.balance
+      .multipliedBy(percent)
+      .div(100)
+      .multipliedBy(new BigNumber(10).pow(this.token.decimals))
+    if (liquidity.gt(0)) {
+      await this.token.approve(
+        liquidity.toFixed(0),
+        this.routerV2Contract.address
+      )
+      const deadline = Math.floor(Date.now() / 1000) + 60 * 20 // 20 mins time
       const args: any[] = [
         this.token0.address,
         this.token1.address,
@@ -169,7 +200,8 @@ export class PairContract implements BaseContract {
         0,
         0,
         wallet.account,
-        deadline]
+        deadline,
+      ]
       await exec(this.routerV2Contract.contract, 'removeLiquidity', args)
       await this.init()
     }

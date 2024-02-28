@@ -126,7 +126,6 @@ class Liquidity {
       this.liquidityLoading = true
       const pairsTokensMap = {}
       const poolsLength = await this.factoryContract.allPairsLength()
-      console.log('poolsLength', poolsLength.toString())
       const poolAddresses = await Promise.all(
         Array.from({ length: poolsLength }).map((i, index) => {
           return this.factoryContract.allPairs(index)
@@ -136,14 +135,12 @@ class Liquidity {
         const pairContract = new PairContract({
           address: poolAddress,
         })
-        // if (['0x41ffb8e98174e84faaa7133b2e6ff30537c64d66', '0x2e985184792faddc8ab9a0e855f289576a1e5dd2', '0xeeaea06afd271f665ba005aaadddbf4adceb330a', '0xa3c79e1ec388f5faaac993deeaf3bc4ebd10568b'].includes(poolAddress)){
-        //   console.log('pairContract------',pairContract)
-        // }
         pairContract.initToken()
         await when(() => pairContract.token.isInit)
 
         return pairContract
-      }))).filter((pair) => pair.token.balance.gt(0))
+      })))
+      // .filter((pair) => pair.token.balance.gt(0))
       this.pairsByToken = (
         await Promise.all(
           this.pairs.map(async (pair) => {
@@ -159,6 +156,7 @@ class Liquidity {
         return acc
       }, {})
       this.pairsTokens = Object.values(pairsTokensMap)
+      console.log('this.pairsTokens', this.pairsTokens)
       swap.fromToken = this.pairs[0]?.token0 || new Token({})
       swap.toToken = this.pairs[0]?.token1 || new Token({})
     } catch (error) {

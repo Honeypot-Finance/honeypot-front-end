@@ -32,6 +32,7 @@ export class Network {
   multicallAddress!: string
   multicall: Multicall
   multicallLimit: number
+  multicallBlock: number
   pairTokens: Token[] = []
 
   get readProvider() {
@@ -51,7 +52,8 @@ export class Network {
     this.multicall = new Multicall({
       address: this.multicallAddress,
       limit: this.multicallLimit,
-      readProvider: this.readProvider
+      readProvider: this.readProvider,
+      block: this.multicallBlock
     })
     this.tokens = this._tokens.map((t: any) => new Token({
       ...t,
@@ -81,12 +83,13 @@ export const PolygonTestNetwork =  new Network({
       address: '0x2ef225538c9FcE4641e038Fd6FA64cA5519cF971',
     }),
     factory: new FactoryContract({
-      address: '0x5AD84056574066c774C5e58BC4a0652b6c171253'
+      address: '0x333bB9e7Aa8E02017E92cBAe2A8D500be7c0B95F'
     }),
   },
   tokens: polygonTestTokens as any[],
   multicallAddress: '0xcA11bde05977b3631167028862bE2a173976CA11',
-  multicallLimit:50,
+  multicallLimit:20,
+  multicallBlock: 25444704
 })
 
 
@@ -110,7 +113,7 @@ export const BerachainTestNetwork =  new Network({
   },
   tokens: berachainTestTokens as any[],
   multicallAddress: '0x9d1dB8253105b007DDDE65Ce262f701814B91125',
-  multicallLimit: 25
+  multicallLimit: 40
 })
 
 // export const ScrollTestNetwork =  new Network({
