@@ -34,6 +34,7 @@ export class Network {
   multicallLimit: number
   multicallBlock: number
   pairTokens: Token[] = []
+  defaultPairTokens?: string[] = []
 
   get readProvider() {
     return new ethers.providers.JsonRpcProvider(
@@ -89,7 +90,8 @@ export const PolygonTestNetwork =  new Network({
   tokens: polygonTestTokens as any[],
   multicallAddress: '0xcA11bde05977b3631167028862bE2a173976CA11',
   multicallLimit:20,
-  multicallBlock: 25444704
+  multicallBlock: 25444704,
+  defaultPairTokens: ['0x878fd3Ccf564Cc2e38EEdDd798F88D8f8a51a1dD']
 })
 
 
@@ -113,7 +115,8 @@ export const BerachainTestNetwork =  new Network({
   },
   tokens: berachainTestTokens as any[],
   multicallAddress: '0x9d1dB8253105b007DDDE65Ce262f701814B91125',
-  multicallLimit: 40
+  multicallLimit: 25
+
 })
 
 // export const ScrollTestNetwork =  new Network({

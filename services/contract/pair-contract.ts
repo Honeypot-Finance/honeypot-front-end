@@ -117,6 +117,7 @@ export class PairContract implements BaseContract {
   }
 
   async init() {
+    this.initToken()
     await Promise.all([
       this.getReserves(),
       this.getToken0(),

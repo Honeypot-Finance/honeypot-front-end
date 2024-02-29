@@ -68,30 +68,24 @@ class Swap {
   }
 
   constructor() {
-    reaction(() => this.fromToken,() => {
+    reaction(() => this.fromToken,async () => {
       if (!this.fromToken || !this.toToken) {
         return null
       }
       this.fromAmount = ''
       // console.log('')
-      this.currentPair = liquidity.pairsByToken?.[
-        `${this.fromToken.address}-${this.toToken.address}`
-      ]
+      this.currentPair = await liquidity.getPairByToken(this.fromToken.address, this.toToken.address)
     })
-    reaction(() => this.toToken, () => {
+    reaction(() => this.toToken, async () => {
       if (!this.fromToken || !this.toToken) {
         return null
       }
       this.toAmount = ''
-      this.currentPair = liquidity.pairsByToken?.[
-        `${this.fromToken.address}-${this.toToken.address}`
-      ]
+      this.currentPair = await liquidity.getPairByToken(this.fromToken.address, this.toToken.address)
     })
-    when(() => liquidity?.pairsByToken && this.fromToken && this.toToken, () => {
+    when(() => liquidity?.pairsByToken && this.fromToken && this.toToken, async () => {
       // console.log('when', liquidity.pairsByToken, `${this.fromToken.address}-${this.toToken.address}`)
-      this.currentPair = liquidity.pairsByToken[
-        `${this.fromToken.address}-${this.toToken.address}`
-      ]
+      this.currentPair = await liquidity.getPairByToken(this.fromToken.address, this.toToken.address)
     })
     reaction(() => this.fromAmount, () => {
       if (this.currentPair) {

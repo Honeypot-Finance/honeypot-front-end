@@ -55,21 +55,14 @@ class Liquidity {
     if (!this.token0 || !this.token1) {
       return null
     }
-    return this.pairsByToken?.[`${this.token0.address}-${this.token1.address}`]
+    return liquidity.getPairByToken(this.token0.address, this.token1.address)
   }
 
   constructor() {
-    reaction(() => wallet.currentNetwork, () => {
+    when(() => wallet.currentNetwork && wallet.currentChainId, () => {
       this.token0 = wallet.currentNetwork.tokens[0]
       this.token1 = wallet.currentNetwork.tokens[1]
-      if (wallet.account) {
-        this.getPools()
-      }
-    }, true)
-    reaction(() => wallet.account, () => {
-      if (wallet.currentChainId) {
-        this.getPools()
-      }
+      this.getPools()
     })
     makeAutoObservable(this)
   }
@@ -135,9 +128,6 @@ class Liquidity {
         const pairContract = new PairContract({
           address: poolAddress,
         })
-        pairContract.initToken()
-        await when(() => pairContract.token.isInit)
-
         return pairContract
       })))
       // .filter((pair) => pair.token.balance.gt(0))
@@ -151,8 +141,6 @@ class Liquidity {
       ).reduce((acc, cur) => {
         pairsTokensMap[cur.token0.address] = cur.token0
         pairsTokensMap[cur.token1.address] = cur.token1
-        acc[`${cur.token0.address}-${cur.token1.address}`] = cur
-        acc[`${cur.token1.address}-${cur.token0.address}`] = cur
         return acc
       }, {})
       this.pairsTokens = Object.values(pairsTokensMap)
@@ -163,6 +151,24 @@ class Liquidity {
       console.error(error,'this.liquidityLoading')
     }
     this.liquidityLoading = false
+  }
+
+  async getPairByToken(token0Address: string, token1Address?: string) {
+    const defaultPairTokens = wallet.currentNetwork.defaultPairTokens
+    token1Address = token1Address || defaultPairTokens?.[0]
+    if (!token1Address) {
+       return null
+    }
+     if (this.pairsByToken[`${token0Address}-${token1Address}`] || this.pairsByToken[`${token1Address}-${token0Address}`]) {
+        const pairContract =  this.pairsByToken[`${token0Address}-${token1Address}`]
+        await when(() => pairContract.isInit)
+     }
+    const pairAddress = await this.factoryContract.getPairByTokens(token0Address, token1Address)
+    if (pairAddress) {
+       const pairContract =  new PairContract({address: pairAddress})
+       pairContract.init()
+       await when(() => pairContract.isInit)
+    }
   }
 
   // async getPairs () {

@@ -93,6 +93,7 @@ const config: NuxtConfig = {
     '~/plugins/vue-debounce.js',
     '~/plugins/utils.ts',
     '~/services/index.ts',
+    '~/plugins/clarity.js',
     // services
     // '~/services/near-api',
   ],
