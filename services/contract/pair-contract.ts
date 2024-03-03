@@ -96,7 +96,7 @@ export class PairContract implements BaseContract {
       this.readContract.token0()
     )
     this.token0 = new Token({
-      address: token0,
+      address: token0.toLowerCase(),
     })
   }
 
@@ -106,7 +106,7 @@ export class PairContract implements BaseContract {
       this.readContract.token1()
     )
     this.token1 = new Token({
-      address: token1,
+      address: token1.toLowerCase(),
     })
   }
 
@@ -124,6 +124,7 @@ export class PairContract implements BaseContract {
       this.getToken1(),
       this.getTotalSupply(),
     ])
+    console.log('this.token', this.token0.address, this.token1.address)
     await this.getPricing()
     await when(() => this.token.isInit)
     if (this.reserves) {
@@ -147,7 +148,6 @@ export class PairContract implements BaseContract {
           this.token0.isInit &&
           this.token1.isInit
       )
-      console.log('this.reserves', this.reserves, this.token0, this.token1)
       if (!this.reserves) {
          return
       }

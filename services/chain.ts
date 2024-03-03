@@ -44,23 +44,28 @@ export class Network {
   constructor({tokens, ...args}: Partial<Network>) {
     Object.assign(this, args)
     this._tokens = tokens ||[]
-    when(() => this.tokens.length && this.tokens.every(t => t.isInit), () => {
-      this.isInit = true
-    })
+
     makeAutoObservable(this)
   }
   init () {
+    this.isInit = false
     this.multicall = new Multicall({
       address: this.multicallAddress,
       limit: this.multicallLimit,
       readProvider: this.readProvider,
       block: this.multicallBlock
     })
+    if (!this.tokens?.length) {
+       this.isInit = true
+       return
+    }
     this.tokens = this._tokens.map((t: any) => new Token({
       ...t,
       _multicall: this.multicall
     }))
-
+    when(() => this.tokens.length && this.tokens.every(t => t.isInit), () => {
+       this.isInit = true
+    })
   }
   async getBalance (account: string) {
     const balance = await this.readProvider.getBalance(account)

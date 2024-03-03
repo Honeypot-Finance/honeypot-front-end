@@ -24,7 +24,7 @@
       <aside class="right deletemobile" :class="isLogged ? 'font2' : 'font1'">
         <v-btn class="btn2">
           <img src="~/assets/sources/logos/honeypot.svg" alt="token" class="aspect" style="--w: 1.533125em">
-          <span>{{ $wallet.currentNetwork.balance.toFormat(3) }}</span>
+          <span>{{ $wallet.currentNetwork && $wallet.currentNetwork.balance.toFormat(3) }}</span>
         </v-btn>
 
         <!-- connect button -->

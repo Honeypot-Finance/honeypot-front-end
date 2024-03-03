@@ -358,7 +358,7 @@ export default {
       await this.$liquidity.addLiquidity(this.$liquidity.token0, this.$liquidity.token1, this.$liquidity.token0Amount, this.$liquidity.token1Amount)
       this.addLiquidityLoading = false
       this.$alert("success", "Liquidity added successfuly")
-      await this.$liquidity.getPools()
+      // await this.$liquidity.getPools()
     },
     async removeLiquidity() {
       // if (!this.$liquidity.currentPair) {
@@ -370,7 +370,7 @@ export default {
       await this.$liquidity.currentRemovePair.removeLiquidity(this.withdrawSelected)
       this.removeLiquidityLoading = false
       this.$alert("success", "Liquidity removed successfuly")
-      await this.$liquidity.getPools()
+      // await this.$liquidity.getPools()
     },
   },
 

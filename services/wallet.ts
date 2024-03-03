@@ -46,7 +46,8 @@ export class Wallet {
     Object.assign(this, args)
     this.setAccount(account)
     reaction(() => this.account, () => {
-      if (this.currentChainId && this.account) {
+      if (this.currentChainId && this.account && this.currentNetwork) {
+        console.log('this.currentNetwork', this.currentNetwork)
         this.currentNetwork.getBalance(this.account)
       }
     })
@@ -56,7 +57,7 @@ export class Wallet {
         this.currentNetwork =
         this.networksMap[this.currentChainId] || ({} as Network)
         this.currentNetwork.init()
-        if (this.account) {
+        if (this.account && this.currentNetwork) {
           this.currentNetwork.getBalance(this.account)
         }
       }

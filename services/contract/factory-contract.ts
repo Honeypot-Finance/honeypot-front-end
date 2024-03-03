@@ -42,6 +42,8 @@ export class FactoryContract implements BaseContract {
   }
 
   getPairByTokens (tokenA: string, tokenB: string) {
+    tokenA = tokenA.toLowerCase()
+    tokenB = tokenB.toLowerCase()
     return this.multicall.load(`getPairByTokens-${tokenA}-${tokenB}`, this.readContract.getPair(tokenA, tokenB))
   }
 

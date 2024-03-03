@@ -68,16 +68,16 @@ class Swap {
   }
 
   constructor() {
-    reaction(() => this.fromToken,async () => {
-      if (!this.fromToken || !this.toToken) {
+    reaction(() => this.fromToken.address,async () => {
+      if (!this.fromToken.address || !this.toToken.address) {
         return null
       }
       this.fromAmount = ''
       // console.log('')
       this.currentPair = await liquidity.getPairByToken(this.fromToken.address, this.toToken.address)
     })
-    reaction(() => this.toToken, async () => {
-      if (!this.fromToken || !this.toToken) {
+    reaction(() => this.toToken.address, async () => {
+      if (!this.fromToken.address || !this.toToken.address) {
         return null
       }
       this.toAmount = ''
