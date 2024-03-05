@@ -170,11 +170,14 @@ export default {
     }
   },
   computed: {
+    pools () {
+      return  this.$liquidity.pairs.filter(p => p.totalSupply.gt(0))
+    },
     filterDataPools() {
       if (!this.filters.search) {
-        return this.$liquidity.pairs
+        return this.pools
       }
-      return this.$liquidity.pairs.filter(data => {
+      return this.pools.filter(data => {
         return data.poolName.toLowerCase().includes(this.filters.search.toLowerCase())
       })
     },

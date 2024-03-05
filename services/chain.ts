@@ -55,7 +55,7 @@ export class Network {
       readProvider: this.readProvider,
       block: this.multicallBlock
     })
-    if (!this.tokens?.length) {
+    if (!this._tokens?.length) {
        this.isInit = true
        return
     }

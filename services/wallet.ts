@@ -13,7 +13,7 @@ export class Wallet {
   ethereum: any = null
   currentChainId: string = ''
   networks = networks || []
-  currentNetwork: Network
+  currentNetwork: Network = new Network({})
   balance: BigNumber = new BigNumber(0)
   provider: ethers.providers.Web3Provider
 
