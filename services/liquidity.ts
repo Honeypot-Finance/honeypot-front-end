@@ -35,6 +35,7 @@ class Liquidity {
   token1Amount: string = ''
   currentPair: PairContract | null = null
   poolsLength: number = 0
+  isInit = true
 
   liquidityLoading = false
 
@@ -170,6 +171,7 @@ class Liquidity {
     this.poolsLength = poolsLength.toNumber()
     await this.getPoolsByPage(1, 10)
     this.liquidityLoading = false
+    this.isInit = true
   }
 
   async getPairByToken(token0Address: string, token1Address?: string) {

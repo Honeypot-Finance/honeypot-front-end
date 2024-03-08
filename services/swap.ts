@@ -93,9 +93,12 @@ class Swap {
       }
 
     })
-    reaction(() => liquidity.pairs, () => {
-      this.fromToken = liquidity.pairs[0]?.token0 || new Token({})
-      this.toToken = liquidity.pairs[0]?.token1 || new Token({})
+    reaction(() => liquidity.isInit, () => {
+      if ( liquidity.isInit) {
+        this.fromToken = liquidity.pairs[0]?.token0 || new Token({})
+        this.toToken = liquidity.pairs[0]?.token1 || new Token({})
+      }
+
     })
     makeAutoObservable(this)
   }
