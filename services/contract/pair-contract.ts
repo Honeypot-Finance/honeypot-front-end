@@ -23,6 +23,7 @@ export class PairContract implements BaseContract {
   poolName: string = ''
   liquidity: string = ''
   totalSupply: BigNumber = new BigNumber(0)
+  hasOwnLiquidity = false
   get readContract() {
     return new Contract(this.address, this.abi)
   }
@@ -141,6 +142,7 @@ export class PairContract implements BaseContract {
             .multipliedBy(this.token.balance)
             .div(this.totalSupply)
         : new BigNumber(0)
+      this.hasOwnLiquidity = this.token.balance.gt(0)
     }
     this.isInit = true
   }

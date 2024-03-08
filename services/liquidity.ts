@@ -24,16 +24,17 @@ class Pair {
 }
 
 class Liquidity {
-  pairs: PairContract[] = []
+  pairs: PairContract[] = [] // all pairs
+  myPairs: PairContract[] = [] // my pairs
   pairsByToken: Record<string, PairContract>
   pairsTokens: Token[] = []
   token0: Token = new Token({})
   token1: Token = new Token({})
-  token: Token = new Token({})
   pairsTokensMap = {}
   token0Amount: string = ''
   token1Amount: string = ''
   currentPair: PairContract | null = null
+  poolsLength: number = 0
 
   liquidityLoading = false
 
@@ -72,6 +73,10 @@ class Liquidity {
 
   setCurrentRemovePair(pair: PairContract) {
     this.currentRemovePair = new PairContract(pair)
+  }
+
+  setPairByToken(pairByToken: Record<string, PairContract>) {
+    this.pairsByToken = Object.assign(this.pairsByToken || {}, pairByToken)
   }
 
   switchTokens() {
@@ -117,43 +122,53 @@ class Liquidity {
     await pair.init()
   }
 
-  async getPools() {
+   async getPoolsByPage(page: number, pageSize: number) {
+    const start = (page - 1) * pageSize
+    const myPairs = []
+    if (start >= this.poolsLength) {
+      return
+    }
     try {
-      this.liquidityLoading = true
-      const poolsLength = await this.factoryContract.allPairsLength()
       const poolAddresses = await Promise.all(
-        Array.from({ length: poolsLength }).map((i, index) => {
-          return this.factoryContract.allPairs(index)
+        Array.from({ length: this.poolsLength }).slice(start, start + pageSize).map((i, index) => {
+
+          return this.factoryContract.allPairs(start + index)
         })
       )
-      this.pairs = await Promise.all(
-        poolAddresses.slice(0, 10).map(async (poolAddress) => {
+      const pairs = await Promise.all(
+        poolAddresses.map(async (poolAddress) => {
           const pairContract = new PairContract({
             address: poolAddress,
           })
+          await pairContract.init()
           return pairContract
         })
       )
+      pairs.forEach((pair) => {
+        this.pairsTokensMap[pair.token0.address] = pair.token0
+        this.pairsTokensMap[pair.token1.address] = pair.token1
+        this.pairsByToken[`${pair.token0.address}-${pair.token1.address}`] = pair
+        if (pair.hasOwnLiquidity){
+          myPairs.push(pair)
+        }
+      })
       // .filter((pair) => pair.token.balance.gt(0))
-      this.pairsByToken = (
-        await Promise.all(
-          this.pairs.map(async (pair) => {
-            await pair.init()
-            return pair
-          })
-        )
-      ).reduce((acc, cur) => {
-        this.pairsTokensMap[cur.token0.address] = cur.token0
-        this.pairsTokensMap[cur.token1.address] = cur.token1
-        return acc
-      }, {})
       this.pairsTokens = Object.values(this.pairsTokensMap)
-      console.log('this.pairsTokens', this.pairsTokens)
+      this.pairs = this.pairs.concat(pairs)
+      this.myPairs = this.myPairs.concat(myPairs)
       swap.fromToken = this.pairs[0]?.token0 || new Token({})
       swap.toToken = this.pairs[0]?.token1 || new Token({})
+      this.getPoolsByPage(page + 1, pageSize)
     } catch (error) {
-      console.error(error, 'this.liquidityLoading')
+      console.error(error, `this.liquidityLoading-${page}-${pageSize}`)
     }
+   }
+
+  async getPools() {
+    this.liquidityLoading = true
+    const poolsLength = await this.factoryContract.allPairsLength()
+    this.poolsLength = poolsLength.toNumber()
+    await this.getPoolsByPage(1, 10)
     this.liquidityLoading = false
   }
 
@@ -166,8 +181,9 @@ class Liquidity {
     token0Address = token0Address.toLowerCase()
     token1Address = token1Address.toLowerCase()
     if (
-      this.pairsByToken[`${token0Address}-${token1Address}`] ||
-      this.pairsByToken[`${token1Address}-${token0Address}`]
+      this.pairsByToken && ( this.pairsByToken[`${token0Address}-${token1Address}`] ||
+      this.pairsByToken[`${token1Address}-${token0Address}`])
+
     ) {
       const pairContract =
         this.pairsByToken[`${token0Address}-${token1Address}`]
@@ -182,8 +198,10 @@ class Liquidity {
       return
     }
     const pairContract = new PairContract({ address: pairAddress })
-    pairContract.init()
-    this.pairsByToken[`${token0Address}-${token1Address}`] = pairContract
+    await  pairContract.init()
+    this.setPairByToken({
+      [`${token0Address}-${token1Address}`]: pairContract,
+    })
     if (!this.pairsTokensMap[token0Address]) {
       this.pairsTokensMap[token0Address] = new Token({ address: token0Address })
     }

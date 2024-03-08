@@ -53,12 +53,12 @@ import { liquidity } from '../../services/liquidity';
       </template>
     </v-virtual-scroll>
     <div v-else>
-      <v-skeleton-loader  class="w-[100%]" type="list-item"></v-skeleton-loader>
-      <v-skeleton-loader  class="w-[100%]" type="list-item"></v-skeleton-loader>
-      <v-skeleton-loader  class="w-[100%]" type="list-item"></v-skeleton-loader>
-      <v-skeleton-loader  class="w-[100%]" type="list-item"></v-skeleton-loader>
-      <v-skeleton-loader  class="w-[100%]" type="list-item"></v-skeleton-loader>
-      <v-skeleton-loader  class="w-[100%]" type="list-item"></v-skeleton-loader>
+      <v-skeleton-loader class="w-[100%]" type="list-item"></v-skeleton-loader>
+      <v-skeleton-loader class="w-[100%]" type="list-item"></v-skeleton-loader>
+      <v-skeleton-loader class="w-[100%]" type="list-item"></v-skeleton-loader>
+      <v-skeleton-loader class="w-[100%]" type="list-item"></v-skeleton-loader>
+      <v-skeleton-loader class="w-[100%]" type="list-item"></v-skeleton-loader>
+      <v-skeleton-loader class="w-[100%]" type="list-item"></v-skeleton-loader>
     </div>
 
   </v-dialog>
@@ -92,9 +92,6 @@ export default {
       isInit: false
     };
   },
-  created() {
-    this.initData()
-  },
   computed: {
     dataPopularTokens() {
       return this.tokens.slice(0, 3)
@@ -102,6 +99,14 @@ export default {
   },
   watch: {
     async searchToken() {
+      this.filterData()
+    },
+    tokens() {
+      this.filterData()
+    }
+  },
+  methods: {
+    async filterData () {
       this.isLoading = true
       if (!this.searchToken && this.searchToken !== 0) {
         this.filterDataTokens = this.tokens
@@ -124,18 +129,6 @@ export default {
         })
       }
       this.isLoading = false
-    },
-    tokens() {
-      this.initData()
-    }
-  },
-  methods: {
-    initData() {
-      if (this.tokens.length > 0 && !this.isInit) {
-        this.isInit = true
-        this.filterDataTokens = this.tokens
-        this.isLoading = false
-      }
     },
     isDisable(item) {
       return item === this.token

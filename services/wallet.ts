@@ -47,7 +47,6 @@ export class Wallet {
     this.setAccount(account)
     reaction(() => this.account, () => {
       if (this.currentChainId && this.account && this.currentNetwork) {
-        console.log('this.currentNetwork', this.currentNetwork)
         this.currentNetwork.getBalance(this.account)
       }
     })
@@ -110,14 +109,16 @@ export class Wallet {
         method: 'wallet_switchEthereumChain',
         params: [{ chainId }],
       })
+      this.setCurrentNetwork(chainId)
+      window.location.reload()
     } catch (switchError) {
       console.error(switchError)
       // The network has not been added to MetaMask
       if (switchError.code === 4902) {
         this.addNetwork(chainId)
+        this.setCurrentNetwork(chainId)
+        window.location.reload()
       }
-    } finally {
-      this.setCurrentNetwork(chainId)
     }
   }
 

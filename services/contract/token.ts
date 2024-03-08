@@ -21,6 +21,7 @@ export class Token implements BaseContract {
   faucetLoading = false
   isInit = false
   _multicall?: Multicall
+  balanceFormat = ''
   get signer() {
     return wallet.signer
   }
@@ -87,6 +88,7 @@ export class Token implements BaseContract {
         )
       : new BigNumber(0)
       // console.log('balance', this.address, this.balance.toString())
+      this.balanceFormat = this.balance.toFixed(2)
     return this.balance
   }
 

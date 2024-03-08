@@ -35,7 +35,7 @@
       </template>
 
       <template #[`item.balance`]="{ item }">
-        {{ item.balance }}
+        {{ item.balanceFormat }}
       </template>
       <template #[`item.actions`]="{ item }">
         <v-btn class="btn"

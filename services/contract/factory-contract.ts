@@ -41,10 +41,11 @@ export class FactoryContract implements BaseContract {
     return this.multicall.load(`allPairs`, this.readContract.allPairsLength())
   }
 
-  getPairByTokens (tokenA: string, tokenB: string) {
+  async getPairByTokens (tokenA: string, tokenB: string) {
     tokenA = tokenA.toLowerCase()
     tokenB = tokenB.toLowerCase()
-    return this.multicall.load(`getPairByTokens-${tokenA}-${tokenB}`, this.readContract.getPair(tokenA, tokenB))
+    const res = await this.multicall.load(`getPairByTokens-${tokenA}-${tokenB}`, this.readContract.getPair(tokenA, tokenB))
+    return res
   }
 
   async launchToken ({tokenAddress, tokenName, tokenSymbol, tokenAmount, poolHandler, campaignDuration}) {
