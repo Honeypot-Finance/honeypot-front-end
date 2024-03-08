@@ -107,12 +107,11 @@ export default {
   },
   methods: {
     async filterData () {
-      this.isLoading = true
       if (!this.searchToken && this.searchToken !== 0) {
         this.filterDataTokens = this.tokens
-        this.isLoading = false
         return
       }
+      this.isLoading = true
       if (/^(0x)?[0-9a-fA-F]{40}$/.test(this.searchToken)) {
         await this.$liquidity.getPairByToken(this.searchToken)
         const findToken = this.$liquidity.pairsTokensMap[this.searchToken.toLowerCase()]
