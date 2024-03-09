@@ -65,6 +65,7 @@ import { liquidity } from '../../services/liquidity';
 </template>
 
 <script>
+import {Token} from '~/services/contract/token'
 export default {
   name: "TokenModalComponent",
   props: {
@@ -88,8 +89,7 @@ export default {
       modalTokensOpen: false,
       searchToken: undefined,
       filterDataTokens: [],
-      isLoading: true,
-      isInit: false
+      isLoading: false,
     };
   },
   computed: {
@@ -112,20 +112,24 @@ export default {
         return
       }
       this.isLoading = true
-      if (/^(0x)?[0-9a-fA-F]{40}$/.test(this.searchToken)) {
-        await this.$liquidity.getPairByToken(this.searchToken)
+      try {
+        if (/^(0x)?[0-9a-fA-F]{40}$/.test(this.searchToken)) {
         const findToken = this.$liquidity.pairsTokensMap[this.searchToken.toLowerCase()]
-        console.log('findToken', findToken)
         if (findToken) {
           this.filterDataTokens = [findToken]
         } else {
-          this.filterDataTokens = []
+          this.filterDataTokens = [new Token({
+            address: this.searchToken.toLowerCase()
+          })]
         }
 
       } else {
         this.filterDataTokens = this.tokens.filter(data => {
           return data.name.toLowerCase().includes(this.searchToken.toLowerCase())
         })
+      }
+      } catch (error) {
+         console.error(error, 'search filter')
       }
       this.isLoading = false
     },

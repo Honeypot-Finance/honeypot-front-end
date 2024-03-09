@@ -157,8 +157,6 @@ class Liquidity {
       this.pairsTokens = Object.values(this.pairsTokensMap)
       this.pairs = this.pairs.concat(pairs)
       this.myPairs = this.myPairs.concat(myPairs)
-      swap.fromToken = this.pairs[0]?.token0 || new Token({})
-      swap.toToken = this.pairs[0]?.token1 || new Token({})
       this.getPoolsByPage(page + 1, pageSize)
     } catch (error) {
       console.error(error, `this.liquidityLoading-${page}-${pageSize}`)

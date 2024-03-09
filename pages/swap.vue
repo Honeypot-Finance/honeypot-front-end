@@ -19,7 +19,7 @@
 
       <section>
       <!-- middle -->
-      <v-form v-if="!$liquidity.liquidityLoading" ref="form-swap" class="divcol jspace !w-[100%]" style="gap: 12px" @submit.prevent="swap()">
+      <v-form  ref="form-swap" class="divcol jspace !w-[100%]" style="gap: 12px" @submit.prevent="swap()">
         <div class="fnowrap space" style="gap: inherit">
           <!-- card swap left -->
           <aside id="swapFrom" class="target_drag divcol" style="gap: inherit"
@@ -101,16 +101,16 @@
             </v-card>
           </aside>
         </div>
-        <div v-show="!$swap.currentPair" class="text-[#ca8a04]">
+        <div v-show="noMatchPair" class="text-[#ca8a04]">
           There are no pairs for this token, please create liquidity pool first.
         </div>
         <v-btn class="btn stylish" :disabled="!($swap.fromAmount && $swap.toAmount)" @click="swap()">swap</v-btn>
       </v-form>
-      <v-skeleton-loader
+      <!-- <v-skeleton-loader
       v-else
       class="w-[100%]"
       type="card"
-    ></v-skeleton-loader>
+    ></v-skeleton-loader> -->
     </section>
 
 
@@ -211,6 +211,9 @@ export default {
   computed: {
     dataTokens () {
       return this.$liquidity.pairsTokens
+    },
+    noMatchPair () {
+      return this.$swap.fromToken.address && this.$swap.toToken.address && !this.$swap.currentPair
     }
   },
   mounted() {
