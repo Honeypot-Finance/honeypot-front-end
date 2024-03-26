@@ -76,7 +76,7 @@ export class Network {
 
 export const PolygonTestNetwork =  new Network({
   chainId: '0x13881',
-  rpcUrls: ['https://rpc-mumbai.maticvigil.com/'],
+  rpcUrls: ['https://polygon-mumbai-pokt.nodies.app'],
   chainName: 'Mumbai',
   blockExplorerUrls:['https://mumbai.polygonscan.com'],
   nativeCurrency: {
