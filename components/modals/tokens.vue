@@ -65,7 +65,7 @@ import { liquidity } from '../../services/liquidity';
 </template>
 
 <script>
-import {Token} from '~/services/contract/token'
+import { Token } from '~/services/contract/token'
 export default {
   name: "TokenModalComponent",
   props: {
@@ -101,35 +101,39 @@ export default {
     async searchToken() {
       this.filterData()
     },
-    tokens() {
-      this.filterData()
-    }
+    // tokens() {
+    //   this.filterData()
+    // }
   },
   methods: {
-    async filterData () {
-      if (!this.searchToken && this.searchToken !== 0) {
-        this.filterDataTokens = this.tokens
-        return
-      }
+    async filterData() {
+      // if (!this.searchToken && this.searchToken !== 0) {
+      //   this.filterDataTokens = this.tokens
+      //   return
+      // }
       this.isLoading = true
+      if (!this.searchToken) {
+        this.isLoading = false
+        return []
+      }
       try {
         if (/^(0x)?[0-9a-fA-F]{40}$/.test(this.searchToken)) {
-        const findToken = this.$liquidity.pairsTokensMap[this.searchToken.toLowerCase()]
-        if (findToken) {
-          this.filterDataTokens = [findToken]
-        } else {
-          this.filterDataTokens = [new Token({
-            address: this.searchToken.toLowerCase()
-          })]
-        }
+          const findToken = this.$liquidity.pairsTokensMap[this.searchToken.toLowerCase()]
+          if (findToken) {
+            this.filterDataTokens = [findToken]
+          } else {
+            this.filterDataTokens = [new Token({
+              address: this.searchToken.toLowerCase()
+            })]
+          }
 
-      } else {
-        this.filterDataTokens = this.tokens.filter(data => {
-          return data.name.toLowerCase().includes(this.searchToken.toLowerCase())
-        })
-      }
+        } else {
+          this.filterDataTokens = this.tokens.filter(data => {
+            return data.name.toLowerCase().includes(this.searchToken.toLowerCase())
+          })
+        }
       } catch (error) {
-         console.error(error, 'search filter')
+        console.error(error, 'search filter')
       }
       this.isLoading = false
     },

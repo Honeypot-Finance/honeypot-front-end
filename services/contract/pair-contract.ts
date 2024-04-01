@@ -44,9 +44,11 @@ export class PairContract implements BaseContract {
   midPrice1: BigNumber = new BigNumber(1)
   isInit = false
 
+
   get signer() {
     return wallet.signer
   }
+
 
   get routerV2Contract() {
     return wallet.currentNetwork.contracts.routerV2

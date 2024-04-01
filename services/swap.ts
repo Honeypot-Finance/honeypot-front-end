@@ -58,6 +58,10 @@ class Swap {
     )
   }
 
+  get toLpSupply () {
+    return this.currentPair?.token0?.address?.toLocaleLowerCase() === this.fromToken.address?.toLocaleLowerCase() ? this.currentPair?.token0LpSupply : this.currentPair?.token1LpSupply
+  }
+
 
   get factoryContract() {
     return wallet.currentNetwork.contracts.factory
@@ -103,7 +107,7 @@ class Swap {
   }
 
   swapValidate () {
-    if (this.currentPair.token1LpBalance.lt(this.toAmount)) {
+    if (this.toLpSupply.lt(this.toAmount)) {
       return 'Insufficient liquidity'
    }
    return true
