@@ -1,17 +1,14 @@
-import IUniswapV2Pair from '@uniswap/v2-core/build/IUniswapV2Pair.json'
 // import scrollTokens from '~/static/tokens/scroll_tokens.json'
 // import scrollSepoliaTokens from '~/static/tokens/scroll_alpha_tokens.json'
-import { Token } from './contract/token'
-import Vue from 'vue'
-import { BaseContract } from './contract'
-import { ethers } from 'ethers'
-import { PairContract } from './contract/pair-contract'
 import BigNumber from 'bignumber.js'
-import { Wallet, wallet } from './wallet'
-import { makeAutoObservable } from '~/lib/observer'
-import { liquidity } from './liquidity'
-import { reaction, when } from '~/lib/event'
+import Vue from 'vue'
 import { exec } from '~/lib/contract'
+import { reaction, when } from '~/lib/event'
+import { makeAutoObservable } from '~/lib/observer'
+import { PairContract } from './contract/pair-contract'
+import { Token } from './contract/token'
+import { liquidity } from './liquidity'
+import { wallet } from './wallet'
 
 class Swap {
   fromToken: Token = new Token({})
@@ -58,10 +55,12 @@ class Swap {
     )
   }
 
-  get toLpSupply () {
-    return this.currentPair?.token0?.address?.toLocaleLowerCase() === this.fromToken.address?.toLocaleLowerCase() ? this.currentPair?.token0LpSupply : this.currentPair?.token1LpSupply
+  get toLpSupply() {
+    return this.currentPair?.token0?.address?.toLocaleLowerCase() ===
+      this.fromToken.address?.toLocaleLowerCase()
+      ? this.currentPair?.token1LpSupply
+      : this.currentPair?.token0LpSupply
   }
-
 
   get factoryContract() {
     return wallet.currentNetwork.contracts.factory
@@ -72,31 +71,51 @@ class Swap {
   }
 
   constructor() {
-    reaction(() => this.fromToken.address,async () => {
-      if (!this.fromToken.address || !this.toToken.address) {
-        return null
+    reaction(
+      () => this.fromToken.address,
+      async () => {
+        if (!this.fromToken.address || !this.toToken.address) {
+          return null
+        }
+        this.fromAmount = ''
+        // console.log('')
+        this.currentPair = await liquidity.getPairByToken(
+          this.fromToken.address,
+          this.toToken.address
+        )
       }
-      this.fromAmount = ''
-      // console.log('')
-      this.currentPair = await liquidity.getPairByToken(this.fromToken.address, this.toToken.address)
-    })
-    reaction(() => this.toToken.address, async () => {
-      if (!this.fromToken.address || !this.toToken.address) {
-        return null
+    )
+    reaction(
+      () => this.toToken.address,
+      async () => {
+        if (!this.fromToken.address || !this.toToken.address) {
+          return null
+        }
+        this.toAmount = ''
+        this.currentPair = await liquidity.getPairByToken(
+          this.fromToken.address,
+          this.toToken.address
+        )
       }
-      this.toAmount = ''
-      this.currentPair = await liquidity.getPairByToken(this.fromToken.address, this.toToken.address)
-    })
-    when(() => liquidity?.pairsByToken && this.fromToken && this.toToken, async () => {
-      // console.log('when', liquidity.pairsByToken, `${this.fromToken.address}-${this.toToken.address}`)
-      this.currentPair = await liquidity.getPairByToken(this.fromToken.address, this.toToken.address)
-    })
-    reaction(() => this.fromAmount, () => {
-      if (this.currentPair) {
-        this.toAmount = this.currentPair.getToAmount(this.fromAmount)
+    )
+    when(
+      () => liquidity?.pairsByToken && this.fromToken && this.toToken,
+      async () => {
+        // console.log('when', liquidity.pairsByToken, `${this.fromToken.address}-${this.toToken.address}`)
+        this.currentPair = await liquidity.getPairByToken(
+          this.fromToken.address,
+          this.toToken.address
+        )
       }
-
-    })
+    )
+    reaction(
+      () => this.fromAmount,
+      () => {
+        if (this.currentPair) {
+          this.toAmount = this.currentPair.getToAmount(this.fromAmount)
+        }
+      }
+    )
     makeAutoObservable(this)
   }
 
@@ -106,11 +125,11 @@ class Swap {
     this.toToken = fromToken
   }
 
-  swapValidate () {
+  swapValidate() {
     if (this.toLpSupply.lt(this.toAmount)) {
       return 'Insufficient liquidity'
-   }
-   return true
+    }
+    return true
   }
 
   async swapExactTokensForTokens() {
@@ -120,17 +139,21 @@ class Swap {
     )
     const deadline = Math.floor(Date.now() / 1000) + 60 * 20 // 20 mins time
     const path = [swap.fromToken.address, swap.toToken.address]
-    const args: any [] = [
+    const args: any[] = [
       swap.fromAmountDecimals.toString(),
       new BigNumber(swap.toAmountDecimals)
         .minus(new BigNumber(swap.toAmountDecimals).multipliedBy(0.015))
-        .toString(),
+        .toFixed(),
       path,
       wallet.account,
       deadline,
     ]
     await exec(this.routerV2Contract.contract, 'swapExactTokensForTokens', args)
-    await Promise.all([liquidity.resetPool(`${this.fromToken.address}-${this.toToken.address}`), this.fromToken.getBalance(), this.toToken.getBalance()])
+    await Promise.all([
+      liquidity.resetPool(`${this.fromToken.address}-${this.toToken.address}`),
+      this.fromToken.getBalance(),
+      this.toToken.getBalance(),
+    ])
     return true
   }
 
