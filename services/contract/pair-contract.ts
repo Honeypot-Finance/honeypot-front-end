@@ -1,14 +1,13 @@
-import { Token } from './token'
-import BigNumber from 'bignumber.js'
-import { swap } from '../swap'
-import { Signer, ethers } from 'ethers'
-import { BaseContract } from '.'
-import { Contract } from 'ethcall'
-import { makeAutoObservable } from '~/lib/observer'
-import { reaction, when } from '~/lib/event'
-import { wallet } from '../wallet'
 import IUniswapV2Pair from '@uniswap/v2-core/build/IUniswapV2Pair.json'
+import BigNumber from 'bignumber.js'
+import { Contract } from 'ethcall'
+import { ethers } from 'ethers'
 import { exec } from '~/lib/contract'
+import { when } from '~/lib/event'
+import { makeAutoObservable } from '~/lib/observer'
+import { BaseContract } from '.'
+import { wallet } from '../wallet'
+import { Token } from './token'
 
 // const totalSupply = await pairContract.methods.totalSupply().call()
 // const LPTokenBalance = await this.balanceOf(pairAddress)
@@ -44,11 +43,9 @@ export class PairContract implements BaseContract {
   midPrice1: BigNumber = new BigNumber(1)
   isInit = false
 
-
   get signer() {
     return wallet.signer
   }
-
 
   get routerV2Contract() {
     return wallet.currentNetwork.contracts.routerV2
@@ -64,9 +61,14 @@ export class PairContract implements BaseContract {
       () => this.token0?.isInit && this.token1?.isInit && this.isInit,
       () => {
         this.liquidity = `${this.token0LpSupply.toFixed(2)} ${
-          this.token0.symbol ||  this.token0.symbol
-        } - ${this.token1LpSupply.toFixed(2)} ${this.token1.symbol || this.token1.name}`
-        this.poolName = (this.token0.symbol ||  this.token1.name) + '-' + (this.token1.symbol || this.token1.name)
+          this.token0.symbol || this.token0.symbol
+        } - ${this.token1LpSupply.toFixed(2)} ${
+          this.token1.symbol || this.token1.name
+        }`
+        this.poolName =
+          (this.token0.symbol || this.token0.name) +
+          '-' +
+          (this.token1.symbol || this.token1.name)
       }
     )
     makeAutoObservable(this)
@@ -132,13 +134,17 @@ export class PairContract implements BaseContract {
     await this.getPricing()
     await when(() => this.token.isInit)
     if (this.reserves) {
-      this.token0LpSupply = new BigNumber(this.reserves.reserve0.toString()).div(new BigNumber(10).pow(this.token0.decimals))
+      this.token0LpSupply = new BigNumber(
+        this.reserves.reserve0.toString()
+      ).div(new BigNumber(10).pow(this.token0.decimals))
       this.token0LpBalance = !new BigNumber(this.totalSupply || 0).eq(0)
         ? new BigNumber(this.reserves.reserve0.toString())
             .multipliedBy(this.token.balance)
             .div(this.totalSupply)
         : new BigNumber(0)
-      this.token1LpSupply = new BigNumber(this.reserves.reserve1.toString()).div(new BigNumber(10).pow(this.token1.decimals))
+      this.token1LpSupply = new BigNumber(
+        this.reserves.reserve1.toString()
+      ).div(new BigNumber(10).pow(this.token1.decimals))
       this.token1LpBalance = !new BigNumber(this.totalSupply || 0).eq(0)
         ? new BigNumber(this.reserves.reserve1.toString())
             .multipliedBy(this.token.balance)
