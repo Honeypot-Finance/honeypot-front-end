@@ -59,7 +59,7 @@ class Swap {
   }
 
   get toLpSupply () {
-    return this.currentPair?.token0?.address?.toLocaleLowerCase() === this.fromToken.address?.toLocaleLowerCase() ? this.currentPair?.token0LpSupply : this.currentPair?.token1LpSupply
+    return this.currentPair?.token0?.address?.toLocaleLowerCase() === this.fromToken.address?.toLocaleLowerCase() ? this.currentPair?.token1LpSupply : this.currentPair?.token0LpSupply
   }
 
 
@@ -87,13 +87,13 @@ class Swap {
       this.toAmount = ''
       this.currentPair = await liquidity.getPairByToken(this.fromToken.address, this.toToken.address)
     })
-    when(() => liquidity?.pairsByToken && this.fromToken && this.toToken, async () => {
+    when(() => liquidity?.pairsByToken && this.fromToken.address && this.toToken.address, async () => {
       // console.log('when', liquidity.pairsByToken, `${this.fromToken.address}-${this.toToken.address}`)
       this.currentPair = await liquidity.getPairByToken(this.fromToken.address, this.toToken.address)
     })
     reaction(() => this.fromAmount, () => {
       if (this.currentPair) {
-        this.toAmount = this.currentPair.getToAmount(this.fromAmount)
+        this.toAmount = this.currentPair.getToAmount(this.fromToken, this.fromAmount).toFixed(8)
       }
 
     })
@@ -124,7 +124,7 @@ class Swap {
       swap.fromAmountDecimals.toString(),
       new BigNumber(swap.toAmountDecimals)
         .minus(new BigNumber(swap.toAmountDecimals).multipliedBy(0.015))
-        .toString(),
+        .toFixed(),
       path,
       wallet.account,
       deadline,

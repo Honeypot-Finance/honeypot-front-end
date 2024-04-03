@@ -47,16 +47,7 @@ export class Token implements BaseContract {
     if (address) {
       this.address = address.toLowerCase()
       this.init()
-      reaction(
-        () => wallet.account,
-        () => {
-          this.getBalance()
-        }
-      )
     }
-    // reaction(() => wallet.currentChainId, () => {
-    //   this.getBalance()
-    // })
     makeAutoObservable(this)
   }
 
@@ -95,7 +86,8 @@ export class Token implements BaseContract {
   async getName() {
     const name = await  this.multicall.load(
       `${this.address}-name`,
-      this.readContract.name()
+      this.readContract.name(),
+      {cache: true}
     )
     this.name = name
     return name
@@ -104,7 +96,8 @@ export class Token implements BaseContract {
   async getSymbol() {
     const symbol = await this.multicall.load(
       `${this.address}-symbol`,
-      this.readContract.symbol()
+      this.readContract.symbol(),
+      {cache: true}
     )
     this.symbol = symbol
     return symbol
@@ -113,7 +106,8 @@ export class Token implements BaseContract {
   async getDecimals() {
     const decimals = await this.multicall.load(
       `${this.address}-decimals`,
-      this.readContract.decimals()
+      this.readContract.decimals(),
+      {cache: true}
     )
     this.decimals = decimals
     return decimals

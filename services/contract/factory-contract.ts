@@ -34,7 +34,9 @@ export class FactoryContract implements BaseContract {
   }
 
   allPairs (index: number) {
-    return this.multicall.load(`${index}-allPairs`, this.readContract.allPairs(index))
+    return this.multicall.load(`${index}-allPairs`, this.readContract.allPairs(index), {
+      cache: true
+    })
   }
 
   allPairsLength () {

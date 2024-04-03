@@ -26,7 +26,7 @@ class Pair {
 class Liquidity {
   pairs: PairContract[] = [] // all pairs
   myPairs: PairContract[] = [] // my pairs
-  pairsByToken: Record<string, PairContract>
+  pairsByToken: Record<string, PairContract> = {}
   pairsTokens: Token[] = []
   token0: Token = new Token({})
   token1: Token = new Token({})
@@ -38,6 +38,7 @@ class Liquidity {
   isInit = true
 
   liquidityLoading = false
+  getPairByTokenLoading = false
 
   currentRemovePair: PairContract | null = null
 
@@ -58,8 +59,8 @@ class Liquidity {
     when(
       () => wallet.currentNetwork?.isInit && wallet.currentChainId,
       () => {
-        this.token0 = wallet.currentNetwork.tokens[0]
-        this.token1 = wallet.currentNetwork.tokens[1]
+        // this.token0 = wallet.currentNetwork.tokens[0]
+        // this.token1 = wallet.currentNetwork.tokens[1]
         this.getPools()
       }
     )
@@ -132,7 +133,6 @@ class Liquidity {
     try {
       const poolAddresses = await Promise.all(
         Array.from({ length: this.poolsLength }).slice(start, start + pageSize).map((i, index) => {
-
           return this.factoryContract.allPairs(start + index)
         })
       )
@@ -172,22 +172,21 @@ class Liquidity {
     this.isInit = true
   }
 
-  async getPairByToken(token0Address: string, token1Address?: string) {
-    const defaultPairTokens = wallet.currentNetwork.defaultPairTokens
-    token1Address = token1Address || defaultPairTokens?.[0]
-    if (!token1Address) {
-      return null
-    }
+  async getPairByToken(token0Address: string, token1Address: string) {
+    console.log('token0Address', token0Address, token1Address)
+    this.getPairByTokenLoading = true
+   try {
     token0Address = token0Address.toLowerCase()
     token1Address = token1Address.toLowerCase()
     if (
       this.pairsByToken && ( this.pairsByToken[`${token0Address}-${token1Address}`] ||
       this.pairsByToken[`${token1Address}-${token0Address}`])
-
     ) {
       const pairContract =
         this.pairsByToken[`${token0Address}-${token1Address}`]
+      pairContract.getPricing()
       await when(() => pairContract.isInit)
+      this.getPairByTokenLoading = false
       return pairContract
     }
     const pairAddress = await this.factoryContract.getPairByTokens(
@@ -195,6 +194,7 @@ class Liquidity {
       token1Address
     )
     if (pairAddress === ethers.constants.AddressZero) {
+      this.getPairByTokenLoading = false
       return
     }
     const pairContract = new PairContract({ address: pairAddress })
@@ -209,8 +209,14 @@ class Liquidity {
       this.pairsTokensMap[token1Address] = new Token({ address: token1Address })
     }
     this.pairsTokens = Object.values(this.pairsTokensMap)
+    pairContract.getPricing()
     await when(() => pairContract.isInit)
+    this.getPairByTokenLoading = false
     return pairContract
+   } catch (error) {
+    console.error(error)
+   }
+   this.getPairByTokenLoading = false
   }
 
   // async getPairs () {

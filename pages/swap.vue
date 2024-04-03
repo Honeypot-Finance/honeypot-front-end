@@ -1,10 +1,11 @@
 <template>
   <div id="swap">
     <ModalsSwap ref="modal"></ModalsSwap>
-    <ModalsTokens :tokens="$liquidity.pairsTokens" ref="fromTokens" @select="onFromSelect" :token="$swap.fromToken" :oppositeToken="$swap.toToken" @switch="$swap.switchTokens()" ></ModalsTokens>
+    <ModalsTokens :tokens="$liquidity.pairsTokens" ref="fromTokens" @select="onFromSelect" :token="$swap.fromToken"
+      :oppositeToken="$swap.toToken" @switch="$swap.switchTokens()"></ModalsTokens>
     <ModalsTokens :tokens="$liquidity.pairsTokens" ref="toTokens" @select="(token) => {
       $swap.toToken = token
-    }" :token="$swap.toToken" @switch="$swap.switchTokens()"  :oppositeToken="$swap.fromToken" ></ModalsTokens>
+    }" :token="$swap.toToken" @switch="$swap.switchTokens()" :oppositeToken="$swap.fromToken"></ModalsTokens>
 
     <section id="swap-header" class="divcol center">
       <h1>Swap</h1>
@@ -18,100 +19,107 @@
       </v-card>
 
       <section>
-      <!-- middle -->
-      <v-form  ref="form-swap" class="divcol jspace !w-[100%]" style="gap: 12px" @submit.prevent="swap()">
-        <div class="fnowrap space" style="gap: inherit">
-          <!-- card swap left -->
-          <aside id="swapFrom" class="target_drag divcol" style="gap: inherit"
-            @dragover="($event) => $event.preventDefault()" @drop="dropToken($event)">
-            <div class="container-options">
-              <label>From</label>
-              <div class="space">
-                <v-chip close close-icon="mdi-chevron-down" class="btn2" @click="$refs.fromTokens.openModalTokens($swap.fromToken)"
-                  @click:close="$refs.fromTokens.openModalTokens($swap.fromToken)">
-                  <v-img :src="$swap.fromToken.logoURI" :alt="`${$swap.fromToken.name} token`" style="--w: 20px; --of: cover" class="aspect mr-2">
-                    <template #placeholder>
-                      <v-skeleton-loader type="avatar" />
-                    </template>
-                  </v-img>
-                  <span>{{ $swap.fromToken.name }}</span>
-                </v-chip>
+        <!-- middle -->
+        <v-card :loading="$liquidity.getPairByTokenLoading" class="!w-[100%] swap-card">
+          <v-form ref="form-swap" class="divcol jspace !w-[100%]" style="gap: 12px" @submit.prevent="swap()">
+            <div class="fnowrap space" style="gap: inherit">
+              <!-- card swap left -->
+              <aside id="swapFrom" class="target_drag divcol" style="gap: inherit"
+                @dragover="($event) => $event.preventDefault()" @drop="dropToken($event)">
+                <div class="container-options">
+                  <label>From</label>
+                  <div class="space">
+                    <v-chip close close-icon="mdi-chevron-down" class="btn2"
+                      @click="$refs.fromTokens.openModalTokens($swap.fromToken)"
+                      @click:close="$refs.fromTokens.openModalTokens($swap.fromToken)">
+                      <v-img :src="$swap.fromToken.logoURI" :alt="`${$swap.fromToken.name} token`"
+                        style="--w: 20px; --of: cover" class="aspect mr-2">
+                        <template #placeholder>
+                          <v-skeleton-loader type="avatar" />
+                        </template>
+                      </v-img>
+                      <span>{{ $swap.fromToken.name }}</span>
+                    </v-chip>
 
-                <div class="center" style="gap: 10px">
-                  <v-btn @click="halfAmount" class="btn2">
-                    <span>half</span>
-                  </v-btn>
-                  <v-btn @click="maxAmount" class="btn2">
-                    <span>max</span>
-                  </v-btn>
+                    <div class="center" style="gap: 10px">
+                      <v-btn @click="halfAmount" class="btn2">
+                        <span>half</span>
+                      </v-btn>
+                      <v-btn @click="maxAmount" class="btn2">
+                        <span>max</span>
+                      </v-btn>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
 
-            <v-card class="card">
-              <div class="divcol">
-                <v-text-field :rules="[this.$rules.max($swap.fromToken.balance)]" :disabled="!$swap.currentPair" v-model="$swap.fromAmount"   hide-spin-buttons solo placeholder="0.00" type="number" class="custome"
-               @keyup="$event => $event.key === 'Enter' ? swap() : ''">
-                  <!-- <template #counter>
+                <v-card class="card">
+                  <div class="divcol">
+                    <v-text-field :rules="[this.$rules.max($swap.fromToken.balance)]" :disabled="!$swap.currentPair"
+                      v-model="$swap.fromAmount" hide-spin-buttons solo placeholder="0.00" type="number" class="custome"
+                      @keyup="$event => $event.key === 'Enter' ? swap() : ''">
+                      <!-- <template #counter>
                     <label class="font1" style="--fs: 21px">~${{ ($swap.fromAmount / 2).formatter(true) || 0 }} USD</label>
                   </template> -->
-                </v-text-field>
-              </div>
-              <label class="font1">Balance {{ $swap.fromToken.balance.toFormat(2) }}</label>
-            </v-card>
-          </aside>
+                    </v-text-field>
+                  </div>
+                  <label class="font1">Balance {{ $swap.fromToken.balance.toFormat(6) }}</label>
+                </v-card>
+              </aside>
 
-          <center>
-            <v-btn icon style="--p: 7px" @click="$swap.switchTokens()">
-              <img src="~/assets/sources/icons/swap-arrow.svg" alt="switch icon" style="--w: 16px">
-            </v-btn>
-          </center>
-
-          <!-- card swap right -->
-          <aside id="swapTo" class="target_drag divcol" style="gap: inherit"
-            @dragover="($event) => $event.preventDefault()" @drop="dropToken($event)">
-            <div class="container-options">
-              <label>To</label>
-              <div class="space">
-                <v-chip close close-icon="mdi-chevron-down" class="tup btn2" @click="$refs.toTokens.openModalTokens($swap.toToken)"
-                  @click:close="$refs.toTokens.openModalTokens($swap.toToken)">
-                  <v-img :src="$swap.toToken.logoURI" :alt="`${$swap.toToken.name} token`" class="aspect mr-2" style="--w: 20px">
-                    <template #placeholder>
-                      <v-skeleton-loader type="avatar" />
-                    </template>
-                  </v-img>
-                  <span>{{ $swap.toToken.name }}</span>
-                </v-chip>
-                <v-btn class="btn2" @click.stop="$refs.modal.modalSettings = true">
-                  <img src="~/assets/sources/icons/settings.svg" alt="settings" style="--w: 18px">
+              <center>
+                <v-btn icon style="--p: 7px" @click="$swap.switchTokens()">
+                  <img src="~/assets/sources/icons/swap-arrow.svg" alt="switch icon" style="--w: 16px">
                 </v-btn>
-              </div>
-            </div>
+              </center>
 
-            <v-card class="card">
-              <div class="divcol">
-                <v-text-field v-model="$swap.toAmount" solo  placeholder="0.00" type="number" class="custome"  hide-spin-buttons
-                  disabled>
-                  <!-- <template #counter>
+              <!-- card swap right -->
+              <aside id="swapTo" class="target_drag divcol" style="gap: inherit"
+                @dragover="($event) => $event.preventDefault()" @drop="dropToken($event)">
+                <div class="container-options">
+                  <label>To</label>
+                  <div class="space">
+                    <v-chip close close-icon="mdi-chevron-down" class="tup btn2"
+                      @click="$refs.toTokens.openModalTokens($swap.toToken)"
+                      @click:close="$refs.toTokens.openModalTokens($swap.toToken)">
+                      <v-img :src="$swap.toToken.logoURI" :alt="`${$swap.toToken.name} token`" class="aspect mr-2"
+                        style="--w: 20px">
+                        <template #placeholder>
+                          <v-skeleton-loader type="avatar" />
+                        </template>
+                      </v-img>
+                      <span>{{ $swap.toToken.name }}</span>
+                    </v-chip>
+                    <v-btn class="btn2" @click.stop="$refs.modal.modalSettings = true">
+                      <img src="~/assets/sources/icons/settings.svg" alt="settings" style="--w: 18px">
+                    </v-btn>
+                  </div>
+                </div>
+
+                <v-card class="card">
+                  <div class="divcol">
+                    <v-text-field v-model="$swap.toAmount" solo placeholder="0.00" type="number" class="custome"
+                      hide-spin-buttons disabled>
+                      <!-- <template #counter>
                     <label class="font1" style="--fs: 21px">~${{ ($swap.toAmount / 2).formatter(true) || 0 }} USD</label>
                   </template> -->
-                </v-text-field>
-              </div>
-              <label class="font1">Balance {{ $swap.toToken.balance.toFormat(2) }}</label>
-            </v-card>
-          </aside>
-        </div>
-        <div v-show="noMatchPair" class="text-[#ca8a04]">
-          There are no pairs for this token, please create liquidity pool first.
-        </div>
-        <v-btn class="btn stylish" :disabled="!($swap.fromAmount && $swap.toAmount)" @click="swap()">swap</v-btn>
-      </v-form>
-      <!-- <v-skeleton-loader
+                    </v-text-field>
+                  </div>
+                  <label class="font1">Balance {{ $swap.toToken.balance.toFormat(6) }}</label>
+                </v-card>
+              </aside>
+            </div>
+            <div v-show="noMatchPair" class="text-[#ca8a04]">
+              There are no pairs for this token, please create liquidity pool first.
+            </div>
+            <v-btn class="btn stylish" :disabled="!($swap.fromAmount && $swap.toAmount)" @click="swap()">swap</v-btn>
+          </v-form>
+        </v-card>
+        <!-- <v-skeleton-loader
       v-else
       class="w-[100%]"
       type="card"
     ></v-skeleton-loader> -->
-    </section>
+      </section>
 
 
       <!-- right -->
@@ -122,10 +130,11 @@
         </div>
 
         <div class="grid" style="gap: inherit" @dragstart="dragstart($event)" @dragend="dragend($event)">
-          <div v-for="(item, i) in dataTokens.slice(0,6)" :key="i" class="divcol center">
+          <div v-for="(item, i) in dataTokens.slice(0, 6)" :key="i" class="divcol center">
             <v-img class="aspect !w-[50px] !h-[50px]">
               <template #default>
-                <img v-show="item.logoURI" :src="item.logoURI" :alt="`${item.name} token`" class="!w-[50px] !h-[50px]" style="--of: cover">
+                <img v-show="item.logoURI" :src="item.logoURI" :alt="`${item.name} token`" class="!w-[50px] !h-[50px]"
+                  style="--of: cover">
               </template>
               <template #placeholder>
                 <v-skeleton-loader type="avatar" />
@@ -209,10 +218,10 @@ export default {
   //   },
   // },
   computed: {
-    dataTokens () {
+    dataTokens() {
       return this.$liquidity.pairsTokens
     },
-    noMatchPair () {
+    noMatchPair() {
       return this.$swap.fromToken.address && this.$swap.toToken.address && !this.$swap.currentPair
     }
   },
@@ -225,10 +234,10 @@ export default {
   },
 
   methods: {
-    halfAmount () {
+    halfAmount() {
       this.$swap.fromAmount = this.$swap.fromToken.balance.div(2).toFixed(2)
     },
-    maxAmount () {
+    maxAmount() {
       this.$swap.fromAmount = this.$swap.fromToken.balance.toFixed(2)
     },
     onFromSelect(token) {
@@ -274,13 +283,13 @@ export default {
     swap() {
       const validated = this.$refs['form-swap'].validate()
       if (!validated) {
-         return
+        return
       }
       if (!(this.$swap.fromAmount && this.$swap.toAmount)) return;
       const data = {
         tokenFrom: this.$swap.fromToken.name,
         priceFrom: this.$swap.fromAmount,
-        tokenTo:  this.$swap.toToken.name,
+        tokenTo: this.$swap.toToken.name,
         priceTo: this.$swap.toAmount,
       }
 

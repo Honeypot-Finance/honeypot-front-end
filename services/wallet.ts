@@ -36,7 +36,7 @@ export class Wallet {
     return this.provider.getSigner()
   }
 
-  constructor({ account, currentChainId, ...args }: Partial<Wallet>) {
+  constructor({ account, ...args }: Partial<Wallet>) {
     this.provider = new ethers.providers.Web3Provider(window.ethereum)
     when(() => window.ethereum, () => {
       window.ethereum.on('chainChanged', this.handleChainChanged)
@@ -49,7 +49,7 @@ export class Wallet {
       if (this.currentChainId && this.account && this.currentNetwork) {
         this.currentNetwork.getBalance(this.account)
       }
-    })
+    }, true)
     makeAutoObservable(this, [new StorePlugin({ observerKeys: ['currentChainId'], namespace: 'wallet', target: this})])
     reaction(() => this.currentChainId, () => {
       if (this.currentChainId) {
@@ -124,7 +124,8 @@ export class Wallet {
 
   handleChainChanged = (chainId: string) => {
     if (!this.networksMap[chainId]) {
-      alert('Please switch to Scroll network')
+      this.switchToNetwork(this.networks[0].chainId)
+      return
     }
     this.setCurrentNetwork(chainId)
   }
@@ -156,7 +157,6 @@ export class Wallet {
     }
   }
 }
-
 export const wallet = new Wallet({
   currentChainId: networks?.[0].chainId
 })

@@ -56,6 +56,8 @@ module.exports = {
     "block-spacing": 0,
     "import/order": 0,
     "arrow-spacing": 0,
-    "dot-location": 0
+    "dot-location": 0,
+    "n/no-callback-literal": 0,
+    "node/no-callback-literal": 0
   }
 }
