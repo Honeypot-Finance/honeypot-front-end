@@ -68,7 +68,7 @@ export class PairContract implements BaseContract {
         this.liquidity = `${this.token0LpSupply.toFixed(2)} ${
           this.token0.symbol ||  this.token0.symbol
         } - ${this.token1LpSupply.toFixed(2)} ${this.token1.symbol || this.token1.name}`
-        this.poolName = (this.token0.symbol ||  this.token1.name) + '-' + (this.token1.symbol || this.token1.name)
+        this.poolName = (this.token0.symbol ||  this.token0.name) + '-' + (this.token1.symbol || this.token1.name)
       }
     )
     makeAutoObservable(this)
