@@ -109,7 +109,7 @@
               </aside>
             </div>
             <div v-show="noMatchPair" class="text-[#ca8a04]">
-              There are no pairs for this token, please create liquidity pool first.
+              {{$liquidity.getPairByTokenLoading ? 'Loading...' : 'There are no pairs for this token, please create liquidity pool first.'}}
             </div>
             <v-btn class="btn stylish" :disabled="!($swap.fromAmount && $swap.toAmount)" @click="swap()">swap</v-btn>
           </v-form>
