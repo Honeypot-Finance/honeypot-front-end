@@ -9,6 +9,7 @@ import { reaction, when } from '~/lib/event'
 import { wallet } from '../wallet'
 import IUniswapV2Pair from '@uniswap/v2-core/build/IUniswapV2Pair.json'
 import { exec } from '~/lib/contract'
+import pRetry from 'p-retry'
 
 // const totalSupply = await pairContract.methods.totalSupply().call()
 // const LPTokenBalance = await this.balanceOf(pairAddress)
@@ -183,7 +184,7 @@ export class PairContract implements BaseContract {
       if (!this.reserves) {
         return
       }
-      const [midPrice0, midPrice1] = await Promise.all([
+      const [midPrice0, midPrice1] = await pRetry(() => Promise.all([
         this.routerV2Contract.contract.getAmountOut(
           new BigNumber(1)
             .multipliedBy(new BigNumber(10).pow(this.token0.decimals))
@@ -198,7 +199,9 @@ export class PairContract implements BaseContract {
           this.reserves.reserve1,
           this.reserves.reserve0
         ),
-      ])
+      ]), {
+        retries:3
+      })
       this.midPrice0 = new BigNumber(midPrice0.toString()).div(
         new BigNumber(10).pow(this.token1.decimals)
       )

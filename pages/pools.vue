@@ -53,7 +53,7 @@
 
     <!-- need empty image here -->
     <v-data-table
-      :loading="$liquidity.liquidityLoading"
+      :loading="!$liquidity.isInit"
       :headers="tableHeaders"
       :items="filterDataPools"
       hide-default-footer
