@@ -169,9 +169,12 @@ export default {
       title,
     }
   },
+  beforeCreate () {
+    this.$liquidity.getMyPools()
+  },
   computed: {
     pools () {
-      return  this.$liquidity.pairs.filter(p => p.totalSupply.gt(0))
+      return  this.$liquidity.myPairs
     },
     filterDataPools() {
       if (!this.filters.search) {

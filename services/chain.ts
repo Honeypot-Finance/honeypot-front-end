@@ -94,7 +94,7 @@ export const PolygonTestNetwork =  new Network({
   },
   tokens: polygonTestTokens as any[],
   multicallAddress: '0xcA11bde05977b3631167028862bE2a173976CA11',
-  multicallLimit:30,
+  multicallLimit:22,
   multicallBlock: 25444704,
   defaultPairTokens: ['0x878fd3Ccf564Cc2e38EEdDd798F88D8f8a51a1dD']
 })

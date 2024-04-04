@@ -23,7 +23,6 @@ export class PairContract implements BaseContract {
   poolName: string = ''
   liquidity: string = ''
   totalSupply: BigNumber = new BigNumber(0)
-  hasOwnLiquidity = false
   get readContract() {
     return new Contract(this.address, this.abi)
   }
@@ -60,6 +59,10 @@ export class PairContract implements BaseContract {
     return wallet.currentNetwork.multicall
   }
 
+  get hasOwnLiquidity () {
+    return this.token.balanceWithoutDecimals.gt(0)
+  }
+
   constructor(args: Partial<PairContract>) {
     Object.assign(this, args)
     when(
@@ -71,6 +74,10 @@ export class PairContract implements BaseContract {
         this.poolName = (this.token0.symbol ||  this.token0.name) + '-' + (this.token1.symbol || this.token1.name)
       }
     )
+    this.token = new Token({
+      address: this.address,
+      autoLoad: false,
+    })
     makeAutoObservable(this)
   }
 
@@ -121,16 +128,10 @@ export class PairContract implements BaseContract {
     })
   }
 
-  async initToken() {
-    this.token = new Token({
-      address: this.address,
-    })
-    await this.token.getBalance()
-  }
 
-  async init(callback?: any) {
+  async init() {
     await Promise.all([
-      this.initToken(),
+      this.token.init(),
       this.getReserves(),
       this.getToken0(),
       this.getToken1(),
@@ -150,9 +151,7 @@ export class PairContract implements BaseContract {
             .multipliedBy(this.token.balance)
             .div(this.totalSupply)
         : new BigNumber(0)
-      this.hasOwnLiquidity = this.token.balance.gt(0)
     }
-    callback?.(this)
     this.isInit = true
   }
 
@@ -171,7 +170,6 @@ export class PairContract implements BaseContract {
             .multipliedBy(this.token.balance)
             .div(this.totalSupply)
         : new BigNumber(0)
-      this.hasOwnLiquidity = this.token.balance.gt(0)
     }
   }
 

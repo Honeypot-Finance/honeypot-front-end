@@ -14,6 +14,7 @@ export class Token implements BaseContract {
   address: string = ''
   name: string = ''
   balance = new BigNumber(0)
+  balanceWithoutDecimals = new BigNumber(0)
   symbol: string = ''
   decimals!: number
   logoURI = ''
@@ -39,14 +40,16 @@ export class Token implements BaseContract {
     return this._multicall || wallet.currentNetwork.multicall
   }
 
-  constructor({ balance, address, ...args }: Partial<Token>) {
+  constructor({ balance, address, autoLoad = true, ...args }: Partial<Token> & {autoLoad?: boolean}) {
     Object.assign(this, args)
     if (balance) {
       this.balance = new BigNumber(balance)
     }
     if (address) {
       this.address = address.toLowerCase()
-      this.init()
+      if (autoLoad) {
+         this.init()
+      }
     }
     makeAutoObservable(this)
   }
@@ -81,6 +84,19 @@ export class Token implements BaseContract {
       // console.log('balance', this.address, this.balance.toString())
       this.balanceFormat = this.balance.toFixed(2)
     return this.balance
+  }
+
+  async getBalanceWithoutDecimals() {
+    await when(() => wallet?.account)
+    const balance = await this.multicall.load(
+      `${this.address}-${wallet.account}-getBalance`,
+      this.readContract.balanceOf(wallet.account)
+    )
+    this.balanceWithoutDecimals = balance
+      ? new BigNumber(balance.toString())
+      : new BigNumber(0)
+      // console.log('balance', this.address, this.balance.toString())
+    return this.balanceWithoutDecimals
   }
 
   async getName() {

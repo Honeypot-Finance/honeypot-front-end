@@ -7,7 +7,7 @@
         <v-icon size="1.5em">mdi-chevron-left</v-icon>
         Back To Pools
       </label>
-
+<!--
       <v-card class="card space gap2" style="--br: 20px">
         <span v-if="!(firstToken.img && secondToken.img)" class="acenter" style="gap: 5px">Create a pool</span>
 
@@ -18,11 +18,7 @@
           btc
         </span>
 
-        <!-- <img
-          src="~/assets/sources/miscellaneous/locked-pools-test-img.jpg" alt="test image"
-          style="--h: 123px; --ar: 1.75 / 1; border-radius: 0 !important"
-        > -->
-      </v-card>
+      </v-card> -->
     </section>
 
 
@@ -219,23 +215,19 @@
 
         <!-- remove tab -->
         <v-sheet v-else id="container-remove" class="divcol fill_w" color="transparent" style="gap: 20px">
-          <template v-if="!($liquidity.currentRemovePair)">
-            <v-card :loading="$liquidity.liquidityLoading" v-for="(item, i) in $liquidity.myPairs" :key="i" class="card space" style="--b: 3px solid #292724; --br: 20px; --p: 20px; --h: 85px">
+          <template v-if="removeMode === 'list'">
+            <v-card class="remove-list" :loading="!$liquidity.isInit">
+              <v-card   v-for="(item, i) in $liquidity.myPairs" :key="i" class="card space" style="--b: 3px solid #292724; --br: 20px; --p: 20px; --h: 85px">
               <div class="center font2" style="gap: 10px">
-                <!-- <v-sheet class="dual-tokens" color="transparent">
-                  <img :src="require(`~/assets/sources/tokens/${item.tokenA}.svg`)" :alt="`${item.tokenA} token`" class="aspect">
-                  <img :src="require(`~/assets/sources/tokens/${item.tokenB}.svg`)" :alt="`${item.tokenB} token`" class="aspect">
-                </v-sheet> -->
-
                 <span class="hspan tup" style="--fs: 21px; --fw: 700">{{item.poolName}}</span>
               </div>
-
               <v-btn
                 class="btn2 font3" style="--b: 1px solid #292724; --br: 30px; --p: 11px 12px"
-                @click="$liquidity.setCurrentRemovePair(item)"
+                @click="removeMode = 'detail';$liquidity.setCurrentRemovePair(item)"
               >
                 <span style="--c: var(--accent); --fw: 500: --fs: 14">Remove</span>
               </v-btn>
+            </v-card>
             </v-card>
           </template>
 
@@ -256,10 +248,6 @@
             <v-sheet class="card divcol align my-3" style="--br: 10px; --bg: #292724; --p: 1.1em; gap: 15px; --max-w: 362px; --w: 100%">
               <div class="space" style="gap: 20px">
                 <div class="center font2" style="gap: 10px">
-                  <!-- <img
-                    :src="require(`~/assets/sources/tokens/${removeSelected.tokenA}.svg`)" :alt="`${removeSelected.tokenA} token`"
-                    style="--w: 27.79px; --of: cover"
-                  > -->
                   <span class="hspan tup" style="--fs: 21px; --fw: 700">{{$liquidity.currentRemovePair.token0.name}}</span>
                 </div>
 
@@ -268,10 +256,6 @@
 
               <div class="space" style="gap: 20px">
                 <div class="center font2" style="gap: 10px">
-                  <!-- <img
-                    :src="require(`~/assets/sources/tokens/${removeSelected.tokenB}.svg`)" :alt="`${removeSelected.tokenB} token`"
-                    style="--w: 27.79px; --of: cover"
-                  > -->
                   <span class="hspan tup" style="--fs: 21px; --fw: 700">{{$liquidity.currentRemovePair.token1.name}}</span>
                 </div>
 
@@ -279,9 +263,14 @@
               </div>
             </v-sheet>
 
-            <v-btn @click="removeLiquidity()"  :loading="removeLiquidityLoading" class="btn" style="--w: 100%; --h: 51px; --fs: 21px">
+            <div class="btn-group">
+              <v-btn @click="removeLiquidity()"  :loading="removeLiquidityLoading" class="btn" style="--w: 100%; --h: 51px; --fs: 21px">
               Withdraw
             </v-btn>
+            <v-btn @click="removeMode='list'"  :loading="removeLiquidityLoading" class="btn btn-unfill" style="--w: 100%; --h: 51px; --fs: 21px">
+              Cancel
+            </v-btn>
+            </div>
           </template>
         </v-sheet>
       </v-sheet>
@@ -301,6 +290,7 @@ export default {
       addLiquidityLoading: false,
       removeLiquidityLoading: false,
       dataControls: ["create", "remove"],
+      removeMode: 'list',
       currentTab: 0,
       firstToken: {
         img: undefined,
@@ -313,23 +303,7 @@ export default {
         amount: undefined,
       },
       isLiquidityAdded: false,
-      // poolList: [
-      //   {
-      //     tokenA: "btc",
-      //     tokenB: "usdc",
-      //     poolName: "btc-usdc",
-      //   },
-      //   {
-      //     tokenA: "hny",
-      //     tokenB: "database",
-      //     poolName: "hny-bear",
-      //   },
-      //   {
-      //     tokenA: "btc",
-      //     tokenB: "usdc",
-      //     poolName: "btc-usdc",
-      //   },
-      // ],
+
       removeSelected: undefined,
       dataWithdrawPercent: [25, 50, 75, 100],
       withdrawSelected: 50,
@@ -341,6 +315,10 @@ export default {
     return {
       title,
     }
+  },
+
+  beforeCreate () {
+    this.$liquidity.getMyPools()
   },
 
   watch: {

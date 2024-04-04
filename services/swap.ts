@@ -93,7 +93,7 @@ class Swap {
     })
     reaction(() => this.fromAmount, () => {
       if (this.currentPair) {
-        this.toAmount = this.currentPair.getToAmount(this.fromToken, this.fromAmount).toFixed(8)
+        this.toAmount = this.currentPair.getToAmount(this.fromToken, this.fromAmount).toFixed()
       }
 
     })

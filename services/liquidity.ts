@@ -35,7 +35,8 @@ class Liquidity {
   token1Amount: string = ''
   currentPair: PairContract | null = null
   poolsLength: number = 0
-  isInit = true
+  isInit = false
+  isMyPairsInit = false
 
   liquidityLoading = false
   getPairByTokenLoading = false
@@ -56,14 +57,14 @@ class Liquidity {
 
 
   constructor() {
-    when(
-      () => wallet.currentNetwork?.isInit && wallet.currentChainId,
-      () => {
-        // this.token0 = wallet.currentNetwork.tokens[0]
-        // this.token1 = wallet.currentNetwork.tokens[1]
-        this.getPools()
-      }
-    )
+    // when(
+    //   () => wallet.currentNetwork?.isInit && wallet.currentChainId,
+    //   () => {
+    //     // this.token0 = wallet.currentNetwork.tokens[0]
+    //     // this.token1 = wallet.currentNetwork.tokens[1]
+    //     this.getPools()
+    //   }
+    // )
     reaction(() => this.token0?.address + this.token1?.address, async () => {
       if (!this.token0?.address || !this.token1?.address) {
         return null
@@ -76,6 +77,7 @@ class Liquidity {
   setCurrentRemovePair(pair: PairContract) {
     this.currentRemovePair = new PairContract(pair)
   }
+
 
   setPairByToken(pairByToken: Record<string, PairContract>) {
     this.pairsByToken = Object.assign(this.pairsByToken || {}, pairByToken)
@@ -128,6 +130,7 @@ class Liquidity {
     const start = (page - 1) * pageSize
     const myPairs = []
     if (start >= this.poolsLength) {
+      this.isInit = true
       return
     }
     try {
@@ -163,17 +166,41 @@ class Liquidity {
     }
    }
 
+   // deprecated temporarily
   async getPools() {
     this.liquidityLoading = true
     const poolsLength = await this.factoryContract.allPairsLength()
     this.poolsLength = poolsLength.toNumber()
     await this.getPoolsByPage(1, 10)
     this.liquidityLoading = false
+  }
+
+  async getMyPools() {
+    if (this.isInit) {
+       return
+    }
+    const poolsLength = await this.factoryContract.allPairsLength()
+    this.poolsLength = poolsLength.toNumber()
+    console.log('this.poolsLength', this.poolsLength)
+    await Promise.all(
+      Array.from({ length: this.poolsLength }).map(async(i, index) => {
+        const poolAddress = await this.factoryContract.allPairs(index)
+        const pairContract = new PairContract({
+          address: poolAddress,
+        })
+        await pairContract.token.getBalanceWithoutDecimals()
+        if (pairContract.hasOwnLiquidity) {
+           this.myPairs.push(pairContract)
+        }
+        return pairContract
+      })
+    )
+    await Promise.all(this.myPairs.map((pair) => pair.init()))
     this.isInit = true
+
   }
 
   async getPairByToken(token0Address: string, token1Address: string) {
-    console.log('token0Address', token0Address, token1Address)
     this.getPairByTokenLoading = true
    try {
     token0Address = token0Address.toLowerCase()
@@ -183,7 +210,9 @@ class Liquidity {
       this.pairsByToken[`${token1Address}-${token0Address}`])
     ) {
       const pairContract =
-        this.pairsByToken[`${token0Address}-${token1Address}`]
+      this.pairsByToken[`${token0Address}-${token1Address}`] ||
+      this.pairsByToken[`${token1Address}-${token0Address}`]
+
       pairContract.getPricing()
       await when(() => pairContract.isInit)
       this.getPairByTokenLoading = false
@@ -199,6 +228,7 @@ class Liquidity {
     }
     const pairContract = new PairContract({ address: pairAddress })
     await  pairContract.init()
+    console.log("token0Address}-${token1Address", `${token0Address}-${token1Address}`)
     this.setPairByToken({
       [`${token0Address}-${token1Address}`]: pairContract,
     })

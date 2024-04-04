@@ -1,10 +1,31 @@
 // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // /
-// // // pools-create // // // 
+// // // pools-create // // //
 // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // /
 #pools-create {
   @include parent;
   padding-inline: var(--margin-global);
 
+  .btn-group{
+    display: flex;
+    gap: 24px;
+    button {
+      flex: 1;
+    }
+  }
+
+  .btn-unfill{
+    background-color: transparent !important;
+    border: 1px solid  rgb(255, 205, 77) !important;
+    span {
+      color: rgb(255, 205, 77) !important;
+    }
+  }
+  .remove-list{
+    background-color: transparent !important;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
   &-header {
     --padding-left: 40px;
     .v-card.card {
@@ -30,7 +51,7 @@
       flex-direction: column;
       align-items: center;
     }
-    
+
     #container-chart {
       aside.fwrap {
         --spacing: 1.875em;
@@ -42,7 +63,7 @@
           display: grid;
           grid-template-columns: repeat(3, 1fr);
         }
-        
+
         &::before {
           content: "";
           @include absolute(0,0,0);
@@ -83,7 +104,7 @@
         pointer-events: none;
       }
       @include media(min, small) {max-width: 480px !important}
-      
+
       #container-liquidity {
         .container-options {
           .v-chip, .v-btn {
@@ -91,7 +112,7 @@
             --br: 30px;
           }
         }
-        
+
         > div.space {
           center {transform: translateY(calc(62px / 2))}
           @include media(max, 500px) {
@@ -104,7 +125,7 @@
             .btn2 + .btn2 {display: none !important}
           }
         }
-        
+
         aside:has(.v-card) .v-card.card {
           --size: 183px;
           max-width: var(--size) !important;
