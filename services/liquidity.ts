@@ -228,7 +228,6 @@ class Liquidity {
     }
     const pairContract = new PairContract({ address: pairAddress })
     await  pairContract.init()
-    console.log("token0Address}-${token1Address", `${token0Address}-${token1Address}`)
     this.setPairByToken({
       [`${token0Address}-${token1Address}`]: pairContract,
     })

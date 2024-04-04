@@ -75,10 +75,12 @@ export class PairContract implements BaseContract {
         this.poolName = (this.token0.symbol ||  this.token0.name) + '-' + (this.token1.symbol || this.token1.name)
       }
     )
-    this.token = new Token({
-      address: this.address,
-      autoLoad: false,
-    })
+    if (!this.token?.address) {
+      this.token = new Token({
+        address: this.address,
+        autoLoad: false,
+      })
+    }
     makeAutoObservable(this)
   }
 

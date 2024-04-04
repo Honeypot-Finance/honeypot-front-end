@@ -345,7 +345,11 @@ export default {
       // }
       this.removeLiquidityLoading = true
       console.dir(this.$liquidity.currentRemovePair)
-      await this.$liquidity.currentRemovePair.removeLiquidity(this.withdrawSelected)
+      try {
+        await this.$liquidity.currentRemovePair.removeLiquidity(this.withdrawSelected)
+      } catch (error) {
+        console.error(error)
+      }
       this.removeLiquidityLoading = false
       this.$alert("success", "Liquidity removed successfuly")
       // await this.$liquidity.getPools()
