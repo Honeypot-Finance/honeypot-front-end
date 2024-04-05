@@ -124,7 +124,7 @@ class Swap {
       swap.fromAmountDecimals.toString(),
       new BigNumber(swap.toAmountDecimals)
         .minus(new BigNumber(swap.toAmountDecimals).multipliedBy(0.015))
-        .toFixed(),
+        .toFixed(0),
       path,
       wallet.account,
       deadline,

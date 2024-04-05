@@ -98,10 +98,10 @@ class Liquidity {
     await when(() => token0.isInit && token1.isInit)
     const token0AmountWithDec = new BigNumber(token0Amount)
       .multipliedBy(new BigNumber(10).pow(token0.decimals))
-      .toFixed()
+      .toFixed(0)
     const token1AmountWithDec = new BigNumber(token1Amount)
       .multipliedBy(new BigNumber(10).pow(token1.decimals))
-      .toFixed()
+      .toFixed(0)
     await Promise.all([
       token0.approve(token0AmountWithDec, this.routerV2Contract.address),
       token1.approve(token1AmountWithDec, this.routerV2Contract.address),
